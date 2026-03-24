@@ -18,8 +18,10 @@
 - Use plan mode first for complex changes
 
 ## Context management
-- When compacting, preserve: modified file list, test results, and key decisions
-- Use `/compact Focus on <topic>` to keep relevant context during long sessions
+- When compacting, preserve: modified file list, test results, and key decisions. Drop verbose tool outputs.
+- Use `/compact Focus on <topic>` proactively when context grows large
+- Read only relevant sections of large files — use offset/limit parameters
+- Delegate research-heavy tasks to subagents to protect main context
 
 ## Imports
 <!-- Use @path syntax to pull in project-specific or shared docs -->

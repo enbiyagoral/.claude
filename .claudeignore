@@ -55,6 +55,10 @@ public/assets/
 # Archive docs (historical, 0 token cost)
 docs/archive/
 
+# Reference templates (not needed in context)
+examples/
+docs/learnings/README.md
+
 # Old Claude sessions and completions
 .claude/sessions/
 .claude/completions/

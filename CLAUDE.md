@@ -16,17 +16,6 @@ The repo itself IS the `.claude` directory structure that lives at a project roo
 - `docs/architecture/OVERVIEW.md` — system design template (fill in when copied to a project)
 - `examples/` — Reference templates (not loaded automatically)
 
-## Key files
-
-- `.claude/settings.json` — permissions, PostToolUse hooks, and SessionStart compact hook
-- `.claude/rules/code-quality.md` — always-loaded team coding standards
-- `.claude/rules/common-mistakes.md` — top active bugs (max 10 items; graduate resolved ones to `docs/learnings/`)
-- `.claude/hooks/scripts/post-edit-lint.sh` — runs after every Write/Edit; auto-lints TS/JS, Python, Go
-- `.claude/skills/k8s-deploy/` — Kubernetes deploy workflow (triggered by: deploy, rollout, helm, pod, etc.)
-- `.claude/skills/docker-debug/` — Docker debug workflow (triggered by: container, crash, OOMKilled, etc.)
-- `.claude/agents/code-reviewer.md` — subagent for code review (runs in its own context window, has persistent memory)
-- `.claude/rules/frontend-example.md` — path-specific rule example (only loads for matching file patterns)
-
 ## Customization workflow
 
 When adding or modifying this template:
@@ -45,9 +34,17 @@ When adding or modifying this template:
 - Scripts in `skills/*/scripts/` should be deterministic status checks or formatters — not reconstruction of logic Claude should reason through
 - `docs/archive/` is listed in `.claudeignore` — 0 token cost; anything superseded goes there
 
+## Token efficiency
+
+- Read only the relevant section of large files — use `offset` and `limit` parameters
+- Prefer Grep/Glob over Bash for file search — dedicated tools are cheaper
+- Delegate large research tasks to subagents to protect the main context window
+- Don't echo back file contents — summarize findings instead
+- Use `/compact Focus on <topic>` proactively when context grows large
+
 ## Context management
 
-When compacting, always preserve: the list of modified files, test commands that were run, and any architectural decisions made during the session.
+When compacting, always preserve: the list of modified files, test commands that were run, and any architectural decisions made during the session. Drop verbose tool outputs and intermediate exploration results.
 
 ## Permissions notes
 

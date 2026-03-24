@@ -11,3 +11,4 @@
 - Use a structured logger instead of raw print/console.log
 - Add input validation whenever you add a new endpoint or public interface
 - Follow existing test patterns — don't invent new ones
+- Read only the relevant section of large files — don't load entire files when a specific range suffices
