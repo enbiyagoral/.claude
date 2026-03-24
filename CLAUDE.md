@@ -1,80 +1,51 @@
-# Project: [PROJECT_NAME]
+# CLAUDE.md
 
-[Domain, core concept, and main flow in 2-3 sentences. Example:
-"E-commerce order processing service. Receives orders via REST API,
-validates inventory through warehouse service, and dispatches
-fulfillment events to Kafka. Handles ~50K orders/day."]
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Tech stack
+## What this repo is
 
-- [Language/framework]
-- [Database]
-- [Infrastructure]
-- [CI/CD]
+A reusable Claude Code project scaffolding template. Provides a 3-tier context architecture — skills, agents, hooks, and rules — designed to be copied into any project and customized.
 
-## Quick reference
+The repo itself IS the `.claude` directory structure that lives at a project root. When working here, you are editing the template, not a running application.
 
-- Entry point: [e.g. src/index.ts, cmd/main.go, main.tf]
-- Core logic: [e.g. src/application/, modules/]
-- Config: [e.g. config/, helm/values.yaml]
-- System design: @docs/architecture/OVERVIEW.md
+## Structure
 
-## Common commands
+- `CLAUDE.md` + `.claude/rules/` — Tier 1: always loaded each session
+- `.claude/skills/`, `.claude/agents/`, `docs/learnings/` — Tier 2: loaded only when triggered
+- `docs/archive/`, `.claude/skills/*/references/` — Tier 3: loaded only on explicit request
+- `docs/architecture/OVERVIEW.md` — @imported from CLAUDE.md on demand
+- `examples/` — Reference templates (not loaded automatically)
 
-```bash
-# Build
-[your build command]
+## Key files
 
-# Test (single file — prefer this over full suite)
-[your single test command]
+- `.claude/settings.json` — permissions allow/deny list and PostToolUse hooks
+- `.claude/rules/code-quality.md` — always-loaded team coding standards
+- `.claude/rules/common-mistakes.md` — top active bugs (max 10 items; graduate resolved ones to `docs/learnings/`)
+- `.claude/hooks/scripts/post-edit-lint.sh` — runs after every Write/Edit; auto-lints TS/JS, Python, Go
+- `.claude/skills/k8s-deploy/` — Kubernetes deploy workflow (triggered by: deploy, rollout, helm, pod, etc.)
+- `.claude/skills/docker-debug/` — Docker debug workflow (triggered by: container, crash, OOMKilled, etc.)
+- `.claude/agents/code-reviewer.md` — subagent for code review (runs in its own context window)
 
-# Lint
-[your lint command]
+## Customization workflow
 
-# Type check
-[your typecheck command]
+When adding or modifying this template:
 
-# Deploy (dry-run)
-[your dry-run deploy command]
-```
+1. **New skill** — create `.claude/skills/<name>/SKILL.md` with a trigger description and workflow steps; add environment-specific detail to `references/` (Tier 3)
+2. **New rule** — add to `.claude/rules/`; keep files short (Tier 1 token budget is ~100 tokens for all rules combined)
+3. **New hook** — add script to `.claude/hooks/scripts/`, wire it in `settings.json` under the appropriate event
+4. **Graduating a common mistake** — move the item from `common-mistakes.md` to a `docs/learnings/YYYY-MM-DD-<slug>.md` file using the template in `docs/learnings/README.md`
+5. **New agent** — add to `.claude/agents/`; use agents (not skills) for tasks that would pollute the main conversation context
 
-## Code style
+## Design constraints
 
-- Use ES modules (import/export) syntax
-- Prefer functional components with hooks
-- Add explicit return types to all functions
-- Handle errors with custom error classes
-- Use structured logging with context fields (never raw print/console.log)
-
-## Architecture
-
-- `src/` — Source code
-- `tests/` — Test files (mirrors src/ structure)
-- `deploy/` — Kubernetes manifests and Helm charts
-- `docs/` — Detailed docs (read on demand: @docs/architecture/)
+- `CLAUDE.md` + all `rules/` files combined should stay under ~500 tokens — keep them dense and non-redundant
+- `common-mistakes.md` must stay under 10 items
+- Hooks are deterministic (always run); CLAUDE.md instructions are advisory (Claude may skip)
+- Scripts in `skills/*/scripts/` should be deterministic status checks or formatters — not reconstruction of logic Claude should reason through
+- `docs/archive/` is listed in `.claudeignore` — 0 token cost; anything superseded goes there
 
 ## Boundaries
 
-- IMPORTANT: Always create a feature branch for changes; merge to `main` via PR
-- Route production deploys through `deploy/staging/` first; only CI touches `deploy/production/`
-- Keep secrets in vault/env manager; reference them by name (never log or commit secret values)
-- Create new migration files for schema changes; treat existing migrations as immutable history
-- Regenerate generated files from source; treat them as read-only (never edit directly)
-
-## Output preferences
-
-- Explain what you will change and why before implementing
-- Show dry-run or diff output before destructive operations
-- [Add your own non-default preferences here]
-
-## Workflow
-
-- Run typecheck and lint after every code change
-- Run the single relevant test file, not the full suite
-- For complex tasks: plan first, get approval, then implement
-
-## Additional context
-
-- Git workflow: @docs/git-workflow.md
-- API conventions: @docs/api-conventions.md
-- Personal overrides: @~/.claude/CLAUDE.md
+- Never commit `.claude/settings.local.json` — it's gitignored for personal overrides
+- Keep secrets out of all tracked files; reference by name only
+- `docs/archive/` is for superseded content only — never delete outright, archive it
