@@ -7,6 +7,7 @@ description: >
   related to containers.
 argument-hint: "[container-name]"
 allowed-tools: Bash(docker *)
+disable-model-invocation: true
 ---
 
 # Docker debug workflow

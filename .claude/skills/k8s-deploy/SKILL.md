@@ -41,7 +41,7 @@ kubectl rollout undo deployment/<name> -n <namespace>
 ```
 
 ## Environment-specific differences
-- Staging details: see references/staging.md
-- Production details: see references/production.md
+- Staging details: see [references/staging.md](references/staging.md)
+- Production details: see [references/production.md](references/production.md)
 
 IMPORTANT: Always get explicit user approval before deploying to the production namespace.

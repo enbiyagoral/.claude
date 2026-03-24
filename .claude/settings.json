@@ -19,6 +19,9 @@
       "Bash(git pull *)",
       "Bash(kubectl get *)",
       "Bash(kubectl describe *)",
+      "Bash(kubectl apply *)",
+      "Bash(kubectl diff *)",
+      "Bash(kubectl rollout *)",
       "Bash(docker ps *)",
       "Bash(docker logs *)"
     ],
@@ -54,7 +57,7 @@
           },
           {
             "type": "command",
-            "command": "echo '✓ File changed — lint auto-ran via post-edit hook'"
+            "command": "echo '✓ lint auto-ran'"
           }
         ]
       }

@@ -57,7 +57,6 @@ docs/archive/
 
 # Reference templates (not needed in context)
 examples/
-docs/learnings/README.md
 
 # Old Claude sessions and completions
 .claude/sessions/
