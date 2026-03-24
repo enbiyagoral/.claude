@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.venv/
+vendor/
+go/pkg/
+
+# Build artifacts
+dist/
+build/
+.next/
+__pycache__/
+*.pyc
+target/
+
+# Generated files
+*.lock
+*.min.js
+*.min.css
+*.map
+coverage/
+.nyc_output/
+
+# Large assets (images, fonts, videos)
+public/assets/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.woff
+*.woff2
+*.mp4
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# Secrets and env
+.env
+.env.*
+*.pem
+*.key
+
+# Terraform state (sensitive + large)
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Docker build context noise
+*.tar
+*.gz
+
+# Archive docs (historical, 0 token cost)
+docs/archive/
+
+# Old Claude sessions and completions
+.claude/sessions/
+.claude/completions/
