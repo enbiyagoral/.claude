@@ -7,11 +7,7 @@
       "Bash(kubectl get *)",
       "Bash(kubectl describe *)",
       "Bash(docker ps *)",
-      "Bash(docker logs *)",
-      "Bash(cat *)",
-      "Bash(ls *)",
-      "Bash(grep *)",
-      "Bash(find *)"
+      "Bash(docker logs *)"
     ],
     "deny": [
       "Bash(kubectl delete *)",
@@ -27,7 +23,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '✓ Dosya değişikliği yapıldı — lint ve typecheck çalıştırmayı unutma'"
+            "command": "bash .claude/hooks/scripts/post-edit-lint.sh"
+          },
+          {
+            "type": "command",
+            "command": "echo '✓ File changed — lint auto-ran via post-edit hook'"
           }
         ]
       }

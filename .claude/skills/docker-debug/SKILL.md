@@ -13,7 +13,7 @@ allowed-tools: Bash(docker *)
 ## Quick status check
 Run the following script to summarize all container states:
 ```bash
-bash ~/.claude/skills/docker-debug/scripts/container-status.sh
+bash .claude/skills/docker-debug/scripts/container-status.sh
 ```
 
 ## Troubleshooting flow

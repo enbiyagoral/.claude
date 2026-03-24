@@ -3,6 +3,10 @@
 .claude/sessions/
 .claude/completions/
 
+# Memory (personal, but keep the template guide tracked)
+memory/
+!memory/MEMORY.md
+
 # Standard ignores
 node_modules/
 dist/
