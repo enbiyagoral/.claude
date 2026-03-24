@@ -36,11 +36,33 @@ When adding or modifying this template:
 
 ## Token efficiency
 
+### Search behavior
+
 - Read only the relevant section of large files — use `offset` and `limit` parameters
-- Prefer Grep/Glob over Bash for file search — dedicated tools are cheaper
-- Delegate large research tasks to subagents to protect the main context window
+- Prefer Grep/Glob over Bash for file search — dedicated tools are cheaper and don't fill context
+- Don't re-read files you already read in this session — use the information you have
+- Be specific in searches: target `file:line` instead of scanning entire directories
+- Stop searching once you have enough information to act — don't explore "just in case"
+
+### Model selection
+
+- Default to **Sonnet** for everyday tasks (edits, tests, simple bugs)
+- Use **Opus** only for complex architecture, multi-file refactoring, or deep debugging
+- Use **plan mode** (Shift+Tab) for analysis — it halves token consumption vs execute mode
+
+### Session hygiene
+
+- One task per session: a bug fix OR a feature OR a refactor — not all three
+- `/clear` when switching to unrelated work — stale context wastes tokens on every subsequent message
+- `/compact Focus on <topic>` at ~40 messages or ~50% context usage
+- Keep sessions focused: 30-45 minutes, then start fresh
+
+### Context protection
+
+- Delegate verbose tasks (test runs, log analysis, research) to subagents — output stays in their context
 - Don't echo back file contents — summarize findings instead
-- Use `/compact Focus on <topic>` proactively when context grows large
+- Audit MCP servers with `/context` — each MCP adds tool definitions even when idle. Prefer CLI tools (`gh`, `aws`) over MCPs when possible
+- Set `MAX_THINKING_TOKENS=10000` for simple tasks; use `/effort` to lower effort level
 
 ## Context management
 

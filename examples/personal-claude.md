@@ -17,11 +17,15 @@
 - Don't open a PR without writing tests
 - Use plan mode first for complex changes
 
-## Context management
-- When compacting, preserve: modified file list, test results, and key decisions. Drop verbose tool outputs.
-- Use `/compact Focus on <topic>` proactively when context grows large
-- Read only relevant sections of large files — use offset/limit parameters
-- Delegate research-heavy tasks to subagents to protect main context
+## Token efficiency
+
+- Default to Sonnet for everyday tasks; Opus only for complex architecture or multi-file refactoring
+- Use plan mode (Shift+Tab) for analysis before execution
+- One task per session — `/clear` when switching topics
+- `/compact Focus on <topic>` at ~40 messages or ~50% context
+- Don't re-read files already in context — use what you have
+- Delegate verbose tasks (tests, logs, research) to subagents
+- Audit MCP servers with `/context` — prefer CLI tools over MCPs
 
 ## Imports
 <!-- Use @path syntax to pull in project-specific or shared docs -->
