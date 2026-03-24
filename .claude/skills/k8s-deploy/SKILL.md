@@ -5,11 +5,14 @@ description: >
   Use this skill whenever the user mentions deploy, rollout, scale, pod, replica,
   namespace, helm, manifest, or anything related to Kubernetes/k8s —
   even if they don't explicitly say "deploy".
+argument-hint: "[namespace] [manifest-path]"
 allowed-tools: Bash(kubectl *), Bash(helm *)
 disable-model-invocation: true
 ---
 
 # Kubernetes deployment workflow
+
+Deploy target: $ARGUMENTS
 
 ## Pre-deployment checks
 1. Verify target namespace: `kubectl config current-context`

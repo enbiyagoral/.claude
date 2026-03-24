@@ -5,6 +5,7 @@ description: >
   Use this skill whenever the user has issues with container, docker, log,
   crash, restart, OOMKilled, image, build errors, or anything
   related to containers.
+argument-hint: "[container-name]"
 allowed-tools: Bash(docker *)
 ---
 

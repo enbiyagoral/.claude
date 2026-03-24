@@ -18,20 +18,21 @@ The repo itself IS the `.claude` directory structure that lives at a project roo
 
 ## Key files
 
-- `.claude/settings.json` — permissions allow/deny list and PostToolUse hooks
+- `.claude/settings.json` — permissions, PostToolUse hooks, and SessionStart compact hook
 - `.claude/rules/code-quality.md` — always-loaded team coding standards
 - `.claude/rules/common-mistakes.md` — top active bugs (max 10 items; graduate resolved ones to `docs/learnings/`)
 - `.claude/hooks/scripts/post-edit-lint.sh` — runs after every Write/Edit; auto-lints TS/JS, Python, Go
 - `.claude/skills/k8s-deploy/` — Kubernetes deploy workflow (triggered by: deploy, rollout, helm, pod, etc.)
 - `.claude/skills/docker-debug/` — Docker debug workflow (triggered by: container, crash, OOMKilled, etc.)
-- `.claude/agents/code-reviewer.md` — subagent for code review (runs in its own context window)
+- `.claude/agents/code-reviewer.md` — subagent for code review (runs in its own context window, has persistent memory)
+- `.claude/rules/frontend-example.md` — path-specific rule example (only loads for matching file patterns)
 
 ## Customization workflow
 
 When adding or modifying this template:
 
 1. **New skill** — create `.claude/skills/<name>/SKILL.md` with a trigger description and workflow steps; add environment-specific detail to `references/` (Tier 3)
-2. **New rule** — add to `.claude/rules/`; keep files short (Tier 1 token budget is ~100 tokens for all rules combined)
+2. **New rule** — add to `.claude/rules/`; keep files short. Use `paths` frontmatter to scope rules to specific file patterns (see `frontend-example.md`)
 3. **New hook** — add script to `.claude/hooks/scripts/`, wire it in `settings.json` under the appropriate event
 4. **Graduating a common mistake** — move the item from `common-mistakes.md` to a `docs/learnings/YYYY-MM-DD-<slug>.md` file using the template in `docs/learnings/README.md`
 5. **New agent** — add to `.claude/agents/`; use agents (not skills) for tasks that would pollute the main conversation context

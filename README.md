@@ -16,7 +16,8 @@ your-project/
 │   │
 │   ├── rules/                             # Tier 1 — loaded alongside CLAUDE.md
 │   │   ├── code-quality.md                # Team-wide coding standards
-│   │   └── common-mistakes.md             # Top 10 active bugs (graduate to learnings/)
+│   │   ├── common-mistakes.md             # Top 10 active bugs (graduate to learnings/)
+│   │   └── frontend-example.md            # Path-specific rule (loads only for matching files)
 │   │
 │   ├── skills/                            # Tier 2 — only metadata scanned at startup
 │   │   ├── k8s-deploy/
