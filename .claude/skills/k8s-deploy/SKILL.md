@@ -6,6 +6,7 @@ description: >
   namespace, helm, manifest, or anything related to Kubernetes/k8s —
   even if they don't explicitly say "deploy".
 allowed-tools: Bash(kubectl *), Bash(helm *)
+disable-model-invocation: true
 ---
 
 # Kubernetes deployment workflow

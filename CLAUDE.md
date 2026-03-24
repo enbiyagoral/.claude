@@ -44,6 +44,14 @@ When adding or modifying this template:
 - Scripts in `skills/*/scripts/` should be deterministic status checks or formatters — not reconstruction of logic Claude should reason through
 - `docs/archive/` is listed in `.claudeignore` — 0 token cost; anything superseded goes there
 
+## Context management
+
+When compacting, always preserve: the list of modified files, test commands that were run, and any architectural decisions made during the session.
+
+## Permissions notes
+
+`git push` is intentionally NOT in the allow list — Claude should ask for approval every time before pushing. Force push and `git reset --hard` are in the deny list. If your project needs `git push` auto-allowed, add it to `settings.local.json` (not the shared settings).
+
 ## Boundaries
 
 - Never commit `.claude/settings.local.json` — it's gitignored for personal overrides
