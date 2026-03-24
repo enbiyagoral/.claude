@@ -36,6 +36,9 @@ your-project/
 │       └── scripts/
 │           └── post-edit-lint.sh
 │
+├── memory/
+│   └── MEMORY.md                          # Memory index template (tracked; actual memories gitignored)
+│
 ├── docs/
 │   ├── architecture/
 │   │   └── OVERVIEW.md                    # @imported from CLAUDE.md on demand
@@ -64,6 +67,7 @@ your-project/
 | `.claude/agents/*.md` | Independent subtasks | Delegated by main session |
 | `docs/learnings/*.md` | Bug post-mortems | Working in related area |
 | `docs/architecture/` | System design | @imported from CLAUDE.md |
+| `memory/*.md` | Persistent Claude memory | Auto-loaded via MEMORY.md index |
 
 ### Tier 3 — Never auto-loaded (0 tokens)
 | File | Purpose | How to access |
@@ -78,7 +82,7 @@ your-project/
 git clone https://github.com/[you]/.claude.git /tmp/.claude-template
 
 # Copy structure (preserves dotfiles)
-cp -r /tmp/.claude-template/{CLAUDE.md,.claude,.claudeignore,.gitignore,docs} your-project/
+cp -r /tmp/.claude-template/{CLAUDE.md,.claude,.claudeignore,.gitignore,docs,memory} your-project/
 
 # Clean up
 rm -rf /tmp/.claude-template

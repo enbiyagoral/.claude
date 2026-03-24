@@ -13,7 +13,7 @@ The repo itself IS the `.claude` directory structure that lives at a project roo
 - `CLAUDE.md` + `.claude/rules/` — Tier 1: always loaded each session
 - `.claude/skills/`, `.claude/agents/`, `docs/learnings/` — Tier 2: loaded only when triggered
 - `docs/archive/`, `.claude/skills/*/references/` — Tier 3: loaded only on explicit request
-- `docs/architecture/OVERVIEW.md` — @imported from CLAUDE.md on demand
+- `docs/architecture/OVERVIEW.md` — system design template (fill in when copied to a project)
 - `examples/` — Reference templates (not loaded automatically)
 
 ## Key files
