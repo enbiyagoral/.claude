@@ -99,18 +99,36 @@ Scripts must be:
 - NOT reconstruction of logic Claude should reason through
 - Executable (`chmod +x` reminder to user)
 
-## Step 5 — Print summary
+## Step 5 — Update parent agent if applicable
 
+After creating the skill files, check if this skill belongs to a Type B agent:
+
+1. Glob `.claude/agents/` for directories (not `.md` files — those are Type A)
+2. For each agent directory found, read its `AGENT.md`
+3. If the skill-name or purpose matches the agent's domain, ask:
+   "This looks related to `<agent-name>`. Should I add this skill to its AGENT.md Skills table?"
+4. If yes — edit the Skills table in that agent's `AGENT.md`:
+
+```markdown
+| <Skill name> | skills/<SKILL_NAME>.md | <Goal it serves> |
 ```
+
+Also ask: "Which goal in `<agent-name>`'s AGENT.md does this skill serve?" — do not guess.
+
+If no Type B agents exist, skip this step silently.
+
+## Step 6 — Print summary
+
+```text
 Created:
   .claude/skills/<skill-name>/SKILL.md
   [.claude/skills/<skill-name>/references/README.md]  ← if applicable
   [.claude/skills/<skill-name>/scripts/<name>.sh]     ← if applicable
+
+[Updated: .claude/agents/<agent-name>/AGENT.md Skills table]  ← if applicable
 
 Trigger phrases: "<what you said in description>"
 
 Next: Fill in the Process steps with your actual workflow.
 If you need environment-specific config, add files to references/.
 ```
-
-Do NOT auto-add the skill anywhere else — skill discovery is file-based, no registry needed.

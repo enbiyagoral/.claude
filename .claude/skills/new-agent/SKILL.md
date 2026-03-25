@@ -16,6 +16,7 @@ Target agent name: $ARGUMENTS
 ## Step 1 — Parse intent
 
 From `$ARGUMENTS`, extract:
+
 - **agent-name**: lowercase, hyphen-separated (e.g., `tf-drift-detector`)
 - **purpose**: what the agent does (if not given, ask one question: "What should this agent do?")
 
@@ -92,32 +93,132 @@ You are a <role>. <One sentence on expertise and approach.>
 
 ## Step 4b — Create Type B agent (autonomous, full folder)
 
-### Phase 1 — Gather information (ask all at once, single message)
-
-Ask these questions in one go — do NOT ask one by one:
+### Phase 1 — Tur 1: Mission + context (2 soru, tek mesaj)
 
 ```text
-Before I build the agent, a few quick questions:
+Before I build the agent, let's start with two things:
 
-1. **Mission**: What does this agent optimize for? (one sentence)
-2. **Goals**: What are 2–4 measurable outcomes? For each, give a KPI + current baseline + target.
-   Example: "Deploy failure rate | Baseline: 8% | Target: <2%"
-3. **Skills**: What capabilities does this agent need? (e.g., "scan Terraform plans", "parse CI logs")
-4. **Schedule**: How often does it run? (daily, weekly, on-demand?)
-5. **Inputs**: What data does it read? (files, logs, API outputs, Slack messages?)
-6. **Hard boundaries**: What should it NEVER do? (e.g., "never apply changes", "never push to prod")
-7. **Escalation**: When should it stop and ask a human?
+1. Mission: What does this agent optimize for? (one sentence — be specific)
+   Bad:  "monitor infrastructure"
+   Good: "detect Terraform drift before it causes production incidents"
+
+2. Context (optional but helpful): What tools, systems, or data sources is it working with?
+   If none apply or it's not tool-specific, just describe the domain.
+   Example: "Terraform + AWS, reads plan output files"
+   Example: "reads Slack incident channel messages"
+   Example: "no specific tools — reads markdown status reports"
 ```
 
-Wait for user answers. Then use the answers to fill every field below — no placeholders left blank.
+Wait for the answer. Then proceed to Tur 2.
 
-If the user gives partial answers, infer reasonable defaults for DevOps context and note what you inferred.
+---
+
+### Phase 1 — Tur 2: Shaped questions based on Tur 1
+
+Read the mission and context carefully. Ask targeted follow-up questions shaped by what you learned — not a generic list.
+
+**How to shape the questions:**
+
+Before writing a single question, reason through these four things based on the mission + context:
+
+1. **What is being tracked?** — Is this about rates, counts, durations, costs, quality scores, states? The KPI format follows from this.
+2. **What does the agent "see"?** — What raw material does it consume? Files it reads, APIs it calls, logs it parses, messages it receives. The input contract follows from this.
+3. **What does the agent "do"?** — Is it detecting anomalies, summarizing reports, generating artefacts, alerting on thresholds? The skill list and decision tree follow from this.
+4. **What could go wrong?** — Where might it take an irreversible or high-impact action? The boundaries and escalation rules follow from this.
+
+The context (tools, systems) is just evidence — use it to sharpen your reasoning, not as a lookup table. Two agents using the same tool can have completely different KPIs, skills, and risk profiles depending on their mission. Let the mission drive the shape; let the context add precision.
+
+Then ask only what you can't infer. Always include these five:
+
+**1. Goals & KPIs** — propose 2–3 specific KPI candidates based on the mission, ask user to confirm or replace:
+
+```text
+Based on your mission, here are likely KPIs — confirm, adjust, or replace:
+  [inferred KPI 1] | Baseline: ? | Target: ?
+  [inferred KPI 2] | Baseline: ? | Target: ?
+Both baseline AND target required. Write "unknown" if baseline isn't measured yet.
+```
+
+**2. Skills** — propose 1–2 skill names based on the mission, ask which goals they serve:
+
+```text
+Likely skills for this agent:
+  [inferred skill 1] — serves [inferred goal]?
+  [inferred skill 2] — serves [inferred goal]?
+Confirm, rename, or add to this list.
+```
+
+**3. Schedule** — suggest a default based on the mission cadence, then ask to confirm:
+
+- "detect/alert" type → daily
+- "review/summarize" type → weekly
+- "on-change" type → on-demand
+
+**4. Inputs** — propose based on context, ask to confirm:
+
+```text
+Expected inputs based on what you described:
+  [inferred input source]
+Does this match? Anything else it should read?
+```
+
+**5. Escalation** — ask with a concrete example relevant to the mission:
+
+```text
+When should this agent stop and ask you directly?
+Example for this type of agent: "[mission-relevant escalation scenario]"
+Give at least 2 conditions.
+```
+
+Only ask about production exposure if the mission or context implies write access or destructive potential. Skip it for read-only agents.
+
+Wait for answers. **Do not generate files until Tur 2 answers are received.**
+
+---
+
+### Phase 1 — Validation before generating
+
+**KPI validation:**
+
+- If any goal is missing baseline or target → stop and ask specifically for that goal's missing value
+- Do not accept vague targets like "improve" or "reduce" — require a number or an explicit "unknown"
+
+**Skill-to-goal mapping:**
+
+- Every skill must map to at least one goal
+- If a skill doesn't map to any goal → ask "Which goal does `<skill>` serve, or should we add a goal for it?"
+- Build the AGENT.md Skills table only after all mappings are confirmed
+
+**Decision tree generation (HEARTBEAT.md):**
+
+- For each skill, derive the trigger condition from Tur 2 answers
+- Pattern: "If [state condition from inputs] → run SKILL_NAME"
+- If trigger is unclear → ask "When exactly should `<skill>` run?"
+- Do not leave decision tree entries as placeholders
+
+**Auto-add hard boundaries when applicable:**
+
+Don't use a checklist — reason from the mission and context:
+
+- Does the agent's "doing" (step 3 above) involve writing, applying, deleting, deploying, or triggering something? → Add a boundary that prevents it from doing that without human approval.
+- Does the agent have access to production systems, sensitive data, or shared state? → Add a boundary scoped to that specific risk.
+- Could the agent's output be consumed by another system automatically? → Add a boundary around unreviewed output propagation.
+
+Example reasoning (not a template to copy):
+"This agent reads CI logs and could theoretically re-trigger a pipeline — so: NEVER trigger pipeline runs without human confirmation."
+"This agent generates Terraform plans — NEVER run apply or destroy."
+"This agent only reads and summarizes — no write-access boundaries needed beyond the standard RULES.md defaults."
+
+Merge inferred boundaries with any the user explicitly listed. If nothing risky is implied, state that and skip.
+
+If user gives partial answers, state what you're inferring and ask for confirmation before generating.
 
 ### Phase 2 — Create files
 
 Create the following structure under `.claude/agents/<agent-name>/`:
 
-### `AGENT.md`
+#### `AGENT.md`
+
 ```markdown
 ---
 name: <agent-name>
@@ -153,7 +254,7 @@ type: autonomous
 
 ## Output Contract
 
-- <Output 1: what it produces, format, location, naming: YYYY-MM-DD_<agent>_<desc>.md>
+- <Output 1: what it produces, format, location, naming: YYYY-MM-DD_agent_desc.md>
 
 ## What Success Looks Like
 
@@ -166,7 +267,8 @@ type: autonomous
 - <Hard boundary 3>
 ```
 
-### `HEARTBEAT.md`
+#### `HEARTBEAT.md`
+
 ```markdown
 # <Agent name> heartbeat
 
@@ -198,11 +300,13 @@ type: autonomous
 ## Escalation Rules
 
 Escalate to human when:
+
 - <Escalation trigger 1>
 - <Escalation trigger 2>
 ```
 
-### `MEMORY.md`
+#### `MEMORY.md`
+
 ```markdown
 # <Agent name> memory
 
@@ -221,7 +325,8 @@ Escalate to human when:
 —
 ```
 
-### `RULES.md`
+#### `RULES.md`
+
 ```markdown
 # <Agent name> rules
 
@@ -252,11 +357,12 @@ Escalate to human when:
 
 ## Sync Safety
 
-- All output files use date-prefix: YYYY-MM-DD_<agent>_<desc>.md
+- All output files use date-prefix: YYYY-MM-DD_agent_desc.md
 - MEMORY.md is the only file updated in-place
 ```
 
-### `skills/_SKILL_TEMPLATE.md`
+#### `skills/_SKILL_TEMPLATE.md`
+
 ```markdown
 # Skill template
 
@@ -277,27 +383,25 @@ Escalate to human when:
 ## Quality Bar
 ```
 
-### Create empty dirs:
+Create empty dirs:
+
 - `data/imports/` with `HOW_TO_EXPORT.md` (brief note on how to drop data)
 - `outputs/`
 
 ## Step 5 — Print summary
 
-```
-Created (<type>):
-  .claude/agents/<agent-name>.md          ← Type A
-  OR
+```text
+Created (Type B):
   .claude/agents/<agent-name>/
-    ├── AGENT.md
-    ├── HEARTBEAT.md
-    ├── MEMORY.md
-    ├── RULES.md
-    ├── skills/_SKILL_TEMPLATE.md
-    ├── data/imports/HOW_TO_EXPORT.md
-    └── outputs/                          ← Type B
+    AGENT.md
+    HEARTBEAT.md
+    MEMORY.md
+    RULES.md
+    skills/_SKILL_TEMPLATE.md
+    data/imports/HOW_TO_EXPORT.md
+    outputs/
 
 Next steps:
-1. Fill in all <placeholder> fields
-2. Add at least one real skill: /new-skill <skill-name>
-3. For Type B: define the decision tree in HEARTBEAT.md
+1. Add at least one real skill: /new-skill <skill-name>
+2. Run first cycle manually to verify the decision tree works
 ```

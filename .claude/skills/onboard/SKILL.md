@@ -175,6 +175,25 @@ Make all changes based on Phase 1 findings and Phase 2 answers.
 - Ask user for confirmation before deleting any skill directories
 - Do NOT delete this onboard skill — it's reusable for re-onboarding when the project evolves
 
+### 3e-2. Suggest autonomous agents for DevOps projects
+
+If the detected stack includes any of: Terraform, Terragrunt, Pulumi, Ansible, k8s, Helm, GitHub Actions, GitLab CI, Jenkins, AWS, GCP, Azure — ask:
+
+```text
+I noticed this is a DevOps/infrastructure project. Would you like to set up any autonomous agents?
+These run on a schedule and track KPIs over time. A few useful examples for your stack:
+
+• pipeline-monitor — tracks CI/CD failure rates and flaky tests
+• drift-detector — detects infra drift between Terraform state and actual resources
+• cost-tracker — monitors cloud spend against budget targets
+• incident-logger — summarizes alerts and incident patterns from logs
+
+Type `/new-agent <name>` to set one up, or say "skip" to continue.
+```
+
+If the user responds with a name or "yes" → immediately invoke the `/new-agent` workflow with that name.
+If the user says "skip" or responds negatively → continue to Phase 4 without comment.
+
 ### 3f. Update docs/architecture/OVERVIEW.md
 
 - Fill in with detected architecture (services, dependencies, data flow)
