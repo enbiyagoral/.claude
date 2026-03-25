@@ -57,6 +57,8 @@ Detects your stack, configures `CLAUDE.md` + `settings.json` + rules + hooks. Fo
 | `/update-rule <name>` | Edit rule, optionally record why in docs/learnings/ |
 | `/update-permissions` | Add allow/deny to settings.json |
 | `/graduate <item>` | Move common-mistakes item to docs/learnings/ |
+| `/retire-agent <name>` | Archive agent (reversible) — moves to agents/archive/ |
+| `/retire-skill <name>` | Archive skill (reversible) — moves to skills/archive/ |
 
 ### Observe
 
