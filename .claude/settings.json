@@ -17,23 +17,13 @@
       "Bash(git rebase *)",
       "Bash(git fetch *)",
       "Bash(git pull *)",
-      "Bash(kubectl get *)",
-      "Bash(kubectl describe *)",
-      "Bash(kubectl apply *)",
-      "Bash(kubectl diff *)",
-      "Bash(kubectl rollout *)",
-      "Bash(helm *)",
-      "Bash(docker ps *)",
-      "Bash(docker logs *)"
+      "Bash(ls *)"
     ],
     "deny": [
       "Bash(git push *force*)",
       "Bash(git reset --hard *)",
       "Bash(git clean *)",
-      "Bash(kubectl delete *)",
-      "Bash(kubectl apply *production*)",
-      "Bash(rm -rf *)",
-      "Bash(docker system prune *)"
+      "Bash(rm -rf *)"
     ]
   },
   "hooks": {
