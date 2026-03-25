@@ -3,7 +3,7 @@ name: code-reviewer
 description: >
   Expert code review specialist. Use proactively after writing or modifying code
   to catch quality, security, and maintainability issues before they reach PR review.
-tools: Read, Grep, Glob, Bash(git diff *)
+tools: Read, Grep, Glob, Bash(git diff *), Write, Edit
 model: sonnet
 permissionMode: plan
 maxTurns: 10
@@ -31,6 +31,17 @@ For each finding:
 - **Recommendation** — How to fix it
 
 If no findings: "LGTM — changes look clean."
+
+## Common mistakes tracking
+
+After each review, check if any finding represents a **recurring pattern** — a mistake that has appeared before or is likely to repeat. If so:
+
+1. Read `.claude/rules/common-mistakes.md`
+2. If the pattern is not already listed and the list has fewer than 10 items, suggest adding it
+3. Ask the user: "This pattern keeps recurring — should I add it to common-mistakes.md?"
+4. Only add with user approval — never auto-add silently
+
+When `common-mistakes.md` reaches 10 items, suggest graduating the least frequent one to `docs/learnings/` before adding new ones.
 
 ## Memory
 
