@@ -37,7 +37,11 @@ cp -r /tmp/.claude-template/{CLAUDE.md,.claude,.claudeignore,.gitignore,docs,mem
 rm -rf /tmp/.claude-template
 ```
 
-Then: fill in `CLAUDE.md` placeholders, adjust `.claude/settings.json` for your stack, delete example skills you don't need, and commit.
+Then run the onboarding skill — it auto-detects your stack, asks a few questions, and configures everything:
+
+```
+/onboard
+```
 
 ## How it works — 3-tier token strategy
 
@@ -49,6 +53,7 @@ your-project/
 │   ├── settings.json                      # Permissions + hooks
 │   ├── rules/                             # Tier 1 — coding standards, common mistakes
 │   ├── skills/                            # Tier 2 — loaded only when triggered
+│   │   ├── onboard/                       #   Auto-detects stack, configures template
 │   │   ├── k8s-deploy/                    #   Deploy workflow + env-specific references
 │   │   └── docker-debug/                  #   Container troubleshooting + status script
 │   ├── agents/                            # Tier 2 — independent subagents (own context)
@@ -79,6 +84,7 @@ your-project/
 | **`rules/code-quality.md`** | Language-agnostic coding standards (Tier 1, always loaded) |
 | **`rules/common-mistakes.md`** | Top recurring Claude pitfalls — max 10 items, graduate resolved ones to learnings/ |
 | **`rules/frontend-example.md`** | Path-specific rule example — only loads for matching file patterns |
+| **`skills/onboard/`** | Auto-detects stack, asks clarifying questions, configures CLAUDE.md + settings + rules for your project |
 | **`skills/k8s-deploy/`** | Kubernetes deploy workflow with `$ARGUMENTS`, dry-run → diff → apply flow |
 | **`skills/docker-debug/`** | Container troubleshooting with deterministic status check script |
 | **`agents/code-reviewer.md`** | Code review subagent — runs in own context window with persistent memory |

@@ -15,7 +15,7 @@ disable-model-invocation: true
 ## Quick status check
 Run the following script to summarize all container states:
 ```bash
-bash .claude/skills/docker-debug/scripts/container-status.sh
+bash ${CLAUDE_SKILL_DIR}/scripts/container-status.sh
 ```
 
 ## Troubleshooting flow
