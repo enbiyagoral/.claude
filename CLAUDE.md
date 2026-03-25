@@ -14,14 +14,14 @@ The repo itself IS the `.claude` directory structure that lives at a project roo
 - `.claude/skills/`, `.claude/agents/`, `docs/learnings/` — Tier 2: loaded only when triggered
 - `docs/archive/`, `.claude/skills/*/references/` — Tier 3: loaded only on explicit request
 - `docs/architecture/OVERVIEW.md` — system design template (fill in when copied to a project)
-- `examples/` — Reference templates (not loaded automatically)
+- `examples/` — Reference templates (not loaded automatically; copy and customize for your project)
 
 ## Customization workflow
 
 When adding or modifying this template:
 
 1. **New skill** — create `.claude/skills/<name>/SKILL.md` with a trigger description and workflow steps; add environment-specific detail to `references/` (Tier 3)
-2. **New rule** — add to `.claude/rules/`; keep files short. Use `paths` frontmatter to scope rules to specific file patterns (see `frontend-example.md`)
+2. **New rule** — add to `.claude/rules/`; keep files short. Use `paths` frontmatter to scope rules to specific file patterns (see `examples/frontend-rule-example.md`)
 3. **New hook** — add script to `.claude/hooks/scripts/`, wire it in `settings.json` under the appropriate event
 4. **Graduating a common mistake** — move the item from `common-mistakes.md` to a `docs/learnings/YYYY-MM-DD-<slug>.md` file using the template in `docs/learnings/README.md`
 5. **New agent** — add to `.claude/agents/`; use agents (not skills) for tasks that would pollute the main conversation context

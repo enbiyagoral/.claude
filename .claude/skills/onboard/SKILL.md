@@ -171,8 +171,9 @@ Make all changes based on Phase 1 findings and Phase 2 answers.
 
 ### 3e. Clean up example skills
 
-- List which example skills are not relevant to this project
-- Ask user for confirmation before deleting any skill directories
+- Glob `.claude/skills/` for any skill whose `SKILL.md` contains `<!-- example` or `# Example` in the first 5 lines
+- If no example skills found → skip this step entirely
+- If found: list them and ask the user which to keep or retire
 - Do NOT delete this onboard skill — it's reusable for re-onboarding when the project evolves
 
 ### 3e-2. Suggest autonomous agents for DevOps projects

@@ -22,6 +22,8 @@ You are a senior engineer. Review the given changes.
 4. **Readability**: Naming, function size, complexity
 5. **Test coverage**: Are new paths tested? Are edge cases covered?
 
+Also enforce rules from `.claude/rules/code-quality.md` — docstrings, magic numbers, function length, structured logging, input validation.
+
 ## Output format
 
 For each finding:

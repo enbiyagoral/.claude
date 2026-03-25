@@ -387,6 +387,18 @@ Create empty dirs:
 
 - `data/imports/` with `HOW_TO_EXPORT.md` (brief note on how to drop data)
 - `outputs/`
+- `journal/` with `README.md`:
+
+```markdown
+# Journal
+
+Dated log entries written by the agent each cycle.
+
+Naming: `YYYY-MM-DD-<slug>.md`
+Example: `2026-03-26-drift-detected.md`
+
+One file per significant event or cycle. Do not edit entries after they are written.
+```
 
 ## Step 5 — Print summary
 
@@ -400,6 +412,7 @@ Created (Type B):
     skills/_SKILL_TEMPLATE.md
     data/imports/HOW_TO_EXPORT.md
     outputs/
+    journal/README.md
 
 Next steps:
 1. Add at least one real skill: /new-skill <skill-name>

@@ -33,7 +33,7 @@ When common-mistakes.md exceeds 10 items:
 YYYY-MM-DD-short-description.md
 ```
 
-Example: `2026-03-24-helm-values-override-order.md`
+Example: `2025-01-15-database-connection-timeout.md`
 
 ## Template for each learning
 
@@ -59,7 +59,7 @@ Add to your CLAUDE.md if a specific learning is broadly relevant:
 
 ```markdown
 ## Additional context
-- Helm override pitfall: @docs/learnings/2026-03-24-helm-values-override-order.md
+- DB connection timeout fix: @docs/learnings/2025-01-15-database-connection-timeout.md
 ```
 
 Claude will only load it when it encounters related work.

@@ -51,14 +51,27 @@ git mv .claude/agents/<name> .claude/agents/archive/<name>
 
 If git mv is unavailable (untracked files), use Bash mv instead.
 
-## Step 4 — Update dependent skills (Type B only)
+## Step 4 — Check skill references (Type B only)
 
-For Type B agents that had skills listed in `AGENT.md`:
-- Glob `.claude/skills/` for skills that reference this agent
-- If found, add a comment at the top of each SKILL.md:
-  ```
-  <!-- Agent retired: <agent-name> — this skill is inactive. Restore with /restore-agent -->
-  ```
+Before archiving, check if this agent's `AGENT.md` Skills table lists any skills:
+
+1. Read `.claude/agents/<name>/AGENT.md` and scan the Skills table
+2. If skills are listed, warn the user:
+
+```text
+Warning: <agent-name> has skills listed in its AGENT.md Skills table:
+  - <skill-1>
+  - <skill-2>
+
+These skills will become orphaned (no parent agent).
+
+Options:
+  a) Retire those skills too with /retire-skill (recommended)
+  b) Keep the skills and archive the agent anyway
+  c) Cancel
+```
+
+Wait for answer. If (a), run `/retire-skill` for each listed skill.
 
 ## Step 5 — Print summary
 
@@ -66,6 +79,7 @@ For Type B agents that had skills listed in `AGENT.md`:
 Retired: <agent-name>
 Archived to: .claude/agents/archive/<name>[.md]
 
-To restore: move back to .claude/agents/ (or use /restore-agent <name> if that skill exists)
-Dependent skills flagged: <list, or "none">
+[Skills also retired: <list>]  ← if applicable
+
+To restore: move back to .claude/agents/
 ```

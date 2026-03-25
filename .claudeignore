@@ -55,6 +55,10 @@ public/assets/
 # Archive docs (historical, 0 token cost)
 docs/archive/
 
+# Archived skills and agents (retired, 0 token cost)
+.claude/skills/archive/
+.claude/agents/archive/
+
 # Reference templates (not needed in context)
 examples/
 

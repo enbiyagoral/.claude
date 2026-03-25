@@ -1,6 +1,5 @@
 # Architecture overview
-
-<!-- Fill in when you copy this template to a project.
+<!-- Copy to docs/architecture/OVERVIEW.md and fill in for your project.
      Reference from CLAUDE.md: @docs/architecture/OVERVIEW.md
      Claude loads this only when working on architecture-related decisions. -->
 
