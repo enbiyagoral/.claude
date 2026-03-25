@@ -16,6 +16,23 @@ Run these three phases in order. Do NOT skip ahead — each phase informs the ne
 
 ---
 
+## Phase 0 — Mode detection (automatic)
+
+Determine how the template is being used:
+
+1. Check if project source files exist alongside the template (`package.json`, `go.mod`, `Cargo.toml`, `*.tf`, `src/`, `app/`, `cmd/`, etc.)
+2. Check if `CLAUDE.md` still contains template placeholders ("What this repo is", "A reusable Claude Code project scaffolding")
+
+**Mode A — Existing project**: Source files found → template was copied into a real project. Proceed to Phase 1, detect everything automatically.
+
+**Mode B — Fresh/empty project**: No source files found → user just set up the template but hasn't started coding yet. Skip Phase 1 stack detection (nothing to detect). In Phase 2, ask what they're building and what stack they'll use. In Phase 3, configure based on their answers with sensible defaults.
+
+**Mode C — Monorepo**: Multiple `package.json`/`go.mod`/etc. found in subdirectories → ask user which services to configure for, then run Phase 1 per service.
+
+Print detected mode and continue.
+
+---
+
 ## Phase 1 — Discovery (automatic, no user input needed)
 
 Scan the project root and detect everything you can:
