@@ -63,12 +63,14 @@ Scan for stack indicators:
 - `composer.json` → PHP
 
 **Project structure:**
+
 - `src/`, `app/`, `pages/`, `components/` → frontend patterns
 - `api/`, `server/`, `cmd/`, `internal/` → backend patterns
 - `test/`, `tests/`, `__tests__/`, `spec/` → test location and framework
 - `migrations/`, `prisma/`, `alembic/`, `drizzle/` → database tooling
 
 **Infrastructure:**
+
 - `Dockerfile`, `docker-compose.yml` → Docker
 - `k8s/`, `helm/`, `charts/`, `manifests/` → Kubernetes
 - `*.tf` → Terraform; also check for `terragrunt.hcl` → Terragrunt
@@ -76,13 +78,23 @@ Scan for stack indicators:
 - `ansible/`, `playbook*.yml` → Ansible
 - `serverless.yml`, `cdk.json` → Serverless/CDK
 
-**CI/CD:**
+**CI/CD (check inside each subdirectory too, not just root):**
 
 - `.github/workflows/` → GitHub Actions
 - `.gitlab-ci.yml` → GitLab CI
 - `Jenkinsfile` → Jenkins
 - `bitbucket-pipelines.yml` → Bitbucket Pipelines
 - `.circleci/` → CircleCI
+- `.pre-commit-config.yaml` → pre-commit hooks
+- `semantic-release` config in `package.json` or `.releaserc` → semantic versioning
+
+**Conventions (detect from files, don't ask):**
+
+- Read `README.md` in 2-3 representative subdirectories to understand project purpose
+- Check `git branch -r` in subdirectories for branch naming patterns
+- Check `.github/PULL_REQUEST_TEMPLATE.md` for PR conventions
+- Check `.editorconfig`, `.prettierrc`, `.eslintrc`, `.terraform-docs.yml` for style conventions
+- Check `Makefile` or `justfile` for build/test/lint commands
 
 **Existing docs:**
 
@@ -90,27 +102,31 @@ Scan for stack indicators:
 - `docs/` → documentation
 - `.env.example` → environment variables
 
-Summarize all findings before proceeding.
+Summarize all findings before proceeding. The goal is to make Phase 2 unnecessary — detect everything you can from files.
 
 ---
 
-## Phase 2 — Clarification (ask only what you couldn't detect)
+## Phase 2 — Clarification (ONLY if Phase 1 left gaps)
 
-Ask the user ONLY about things you couldn't determine from Phase 1. Skip questions you already have answers to.
+STRICT RULES:
 
-Possible questions (ask only if needed):
+- Do NOT ask about anything you can detect from files (README, configs, git history, directory structure)
+- Do NOT ask the user to confirm what you already found — state it and move on
+- Do NOT ask about project purpose if README exists
+- Do NOT ask about conventions if config files exist (`.editorconfig`, linter configs, `Makefile`)
+- Do NOT ask about CI/CD if workflow files exist in any subdirectory
 
-1. "What does this project do in one sentence?" — only if README is missing or unclear
-2. "Any team conventions I should know?" — coding style, PR rules, branch naming
-3. "What environments do you deploy to?" — only if infra files weren't found
-4. "Any areas of the codebase that are fragile or need extra care?"
+The only valid questions are things truly undetectable from code:
+
+1. "Are there areas that need extra caution?" — fragile code, production-critical modules
+2. "Any external dependencies or services not visible in the code?" — private registries, internal APIs
 
 For **Mode B** (fresh project), ask:
 
 1. "What are you building and with what stack?"
 2. "Will this be a monorepo, multi-service, or single project?"
 
-Keep it to 3-4 questions maximum. If Phase 1 gave you enough, say so and move to Phase 3.
+Ask mode confirmation once, then proceed. If Phase 1 covered everything, skip Phase 2 entirely and say so.
 
 ---
 
