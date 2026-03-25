@@ -4,7 +4,7 @@ description: >
   Project onboarding and template setup. Use when the user says onboard, setup,
   initialize, init, configure this project, or first-time setup.
 argument-hint: "[project-path]"
-allowed-tools: Read, Glob, Grep, Bash(ls *), Bash(find *), Bash(rm *), Edit, Write
+allowed-tools: Read, Glob, Grep, Bash(ls *), Edit, Write
 disable-model-invocation: true
 ---
 
@@ -155,8 +155,8 @@ Make all changes based on Phase 1 findings and Phase 2 answers.
 
 ### 3e. Clean up example skills
 
-- No Docker in project? Delete `.claude/skills/docker-debug/`
-- No Kubernetes in project? Delete `.claude/skills/k8s-deploy/`
+- List which example skills are not relevant to this project
+- Ask user for confirmation before deleting any skill directories
 - Do NOT delete this onboard skill — it's reusable for re-onboarding when the project evolves
 
 ### 3f. Update docs/architecture/OVERVIEW.md

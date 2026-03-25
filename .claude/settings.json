@@ -22,6 +22,7 @@
       "Bash(kubectl apply *)",
       "Bash(kubectl diff *)",
       "Bash(kubectl rollout *)",
+      "Bash(helm *)",
       "Bash(docker ps *)",
       "Bash(docker logs *)"
     ],
