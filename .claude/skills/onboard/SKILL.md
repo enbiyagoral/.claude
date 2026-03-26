@@ -229,6 +229,15 @@ type: project
 
 Update `memory/MEMORY.md` index to include a link to `onboard.md`.
 
+### Feedback loop tip
+
+After writing the onboard memory, print:
+
+```text
+Tip: As you work, Claude automatically saves feedback memories when you correct it.
+After a week or two, run /improve to turn recurring patterns into permanent rules.
+```
+
 ---
 
 ## Final summary
