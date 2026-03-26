@@ -1,3 +1,8 @@
+# Example: Code Reviewer Agent
+
+This is a fully configured code-reviewer agent. Copy to `.claude/agents/code-reviewer.md` and customize.
+
+```markdown
 ---
 name: code-reviewer
 description: >
@@ -27,6 +32,7 @@ Also enforce rules from `.claude/rules/code-quality.md` — docstrings, magic nu
 ## Output format
 
 For each finding:
+
 - **File:line** — Location of the finding
 - **Severity** — critical / warning / suggestion
 - **Description** — What is wrong and why
@@ -49,3 +55,4 @@ When `common-mistakes.md` reaches 10 items, suggest graduating the least frequen
 
 Update your agent memory as you discover recurring patterns, common issues,
 and codebase conventions. This builds up institutional knowledge across reviews.
+```
