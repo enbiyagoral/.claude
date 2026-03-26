@@ -15,7 +15,7 @@ Thanks for considering a contribution! This template aims to stay lean and gener
 
 Before submitting, check that your changes respect these limits:
 
-- **`CLAUDE.md` + all `rules/` files** must stay under ~500 tokens combined
+- **`CLAUDE.md` + all `rules/` files** must stay under ~1500 tokens combined
 - **`common-mistakes.md`** must stay under 10 items
 - **Skills** should be generic examples, not stack-specific — users customize for their own project
 - **Hooks** must be deterministic — always run, no conditional skipping

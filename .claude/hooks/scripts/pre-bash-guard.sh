@@ -6,13 +6,23 @@
 INPUT=$(cat 2>/dev/null || true)
 
 if [ -z "$INPUT" ]; then
-  exit 0
+  echo "BLOCKED: Empty hook payload for Bash command."
+  exit 2
 fi
 
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+if ! command -v jq >/dev/null 2>&1; then
+  echo "BLOCKED: jq is required by pre-bash-guard.sh but is not installed."
+  exit 2
+fi
+
+if ! COMMAND=$(echo "$INPUT" | jq -er '.tool_input.command // empty' 2>/dev/null); then
+  echo "BLOCKED: Could not parse Bash command from hook payload."
+  exit 2
+fi
 
 if [ -z "$COMMAND" ]; then
-  exit 0
+  echo "BLOCKED: Bash command payload is empty."
+  exit 2
 fi
 
 # Convert to lowercase for case-insensitive matching.

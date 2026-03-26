@@ -8,7 +8,7 @@
 A 3-tier context architecture for Claude Code projects. Controls token budget by loading information at the right time — not all at once.
 
 ```
-Tier 1 (always loaded, ~500 tokens)
+Tier 1 (always loaded, ~1500 tokens)
 ├── CLAUDE.md              — project conventions & constraints
 └── .claude/rules/*.md     — hard rules (common-mistakes, safety-baseline, project-specific rules)
 
@@ -28,7 +28,7 @@ Tier 3 (loaded on explicit request, zero idle cost)
 - **Skills** — Deterministic SKILL.md files with frontmatter. `disable-model-invocation: true` means Claude follows steps exactly. Organized by lifecycle: scaffold (new-_), manage (update-_, list-\*), retire/restore, and utility (recall, graduate, context-check).
 - **Agents** — Type A (single .md, subagent) or Type B (directory with AGENT.md + HEARTBEAT.md, autonomous). Currently: code-reviewer (Type A).
 - **Hooks** — Shell scripts in `.claude/hooks/scripts/`, wired via `.claude/settings.json`. Deterministic (always run), unlike CLAUDE.md instructions (advisory). Events: PreToolUse, PostToolUse, Stop, SessionStart.
-- **Rules** — Short, directive files in `.claude/rules/`. Scoped globally or to file patterns via `paths` frontmatter. Combined budget with CLAUDE.md: ~500 tokens.
+- **Rules** — Short, directive files in `.claude/rules/`. Scoped globally or to file patterns via `paths` frontmatter. Combined budget with CLAUDE.md: ~1500 tokens.
 
 ## Data flow
 
@@ -54,7 +54,7 @@ User request
 1. **Hooks over CLAUDE.md for enforcement** — CLAUDE.md is advisory; Claude may skip instructions under pressure. Hooks are deterministic shell scripts that always execute. Use hooks for anything that MUST happen.
 2. **Archive over delete** — `retire-skill` and `retire-agent` move to `archive/` instead of deleting. Zero token cost (`.claudeignore`), fully reversible via `restore-*`.
 3. **Stdin JSON, not positional args** — Claude Code passes hook context via stdin as JSON. All hook scripts use `jq` to parse, never `$1`. This is the #1 gotcha for new hook authors.
-4. **Token budget cap** — Tier 1 stays under ~500 tokens. If rules grow, archive or graduate the least critical ones. Skills/agents are Tier 2 and don't count toward this budget.
+4. **Token budget cap** — Tier 1 stays under ~1500 tokens. If rules grow, archive or graduate the least critical ones. Skills/agents are Tier 2 and don't count toward this budget.
 5. **Deterministic skills by default** — `disable-model-invocation: true` ensures skills follow their steps exactly. Only remove this for skills that genuinely need creative interpretation.
 6. **Single-source enforcement model** — Use rules for policy intent, `settings.json` for command-level access, and hooks only for advanced runtime patterns. Avoid duplicating exact restrictions across these surfaces.
 

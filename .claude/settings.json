@@ -53,10 +53,6 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/scripts/post-edit-lint.sh"
-          },
-          {
-            "type": "command",
-            "command": "echo '✓ lint auto-ran'"
           }
         ]
       },

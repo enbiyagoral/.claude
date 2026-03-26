@@ -4,7 +4,7 @@ description: >
   Project onboarding and template setup. Use when the user says onboard, setup,
   initialize, init, configure this project, or first-time setup.
 argument-hint: "[project-path]"
-allowed-tools: Read, Glob, Grep, Bash(ls *), Edit, Write
+allowed-tools: Read, Glob, Grep, Bash(ls *), Bash(find *), Bash(git branch -r *), Edit, Write
 disable-model-invocation: true
 ---
 
@@ -168,7 +168,7 @@ Make all changes based on Phase 1 findings and Phase 2 answers.
 - **safety-baseline.md** — keep as reference-only; enforcement lives in `settings.json` + `pre-bash-guard.sh`
 - Follow the control-surface matrix in `.claude/rules/README.md` (rule vs permissions vs hook) when applying project-specific controls
 - Add stack-specific rule files (for example `typescript.md`, `go.md`, `terraform.md`) based on detected conventions
-- **frontend-example.md** — if frontend detected, update paths to match actual structure; if no frontend, delete the file
+- **examples/frontend-rule-example.md** — if frontend detected, copy to `.claude/rules/frontend.md` and update paths to match actual structure; if no frontend, skip this step
 - Add new path-specific rules if warranted (e.g., `api-rules.md` with `paths: ["api/**"]`)
 - For **Mode C/D** (monorepo/multi-service): add per-service path rules
 

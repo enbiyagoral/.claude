@@ -29,7 +29,7 @@ Detects your stack, configures `CLAUDE.md` + `settings.json` + rules + hooks. Fo
 
 | Tier | What | When loaded |
 | --- | --- | --- |
-| **1** | `CLAUDE.md` + `rules/` | Every session (~500 tokens) |
+| **1** | `CLAUDE.md` + `rules/` | Every session (~1500 tokens) |
 | **2** | Skills, agents, learnings, memory | On trigger or delegation |
 | **3** | Archive, skill references | Only on explicit request |
 

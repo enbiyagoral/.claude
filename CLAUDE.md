@@ -28,7 +28,7 @@ When adding or modifying this template:
 
 ## Design constraints
 
-- `CLAUDE.md` + all `rules/` files combined should stay under ~500 tokens — keep them dense and non-redundant
+- `CLAUDE.md` + all `rules/` files combined should stay under ~1500 tokens — keep them dense and non-redundant
 - `common-mistakes.md` must stay under 10 items
 - Hooks are deterministic (always run); CLAUDE.md instructions are advisory (Claude may skip)
 - Scripts in `skills/*/scripts/` should be deterministic status checks or formatters — not reconstruction of logic Claude should reason through
