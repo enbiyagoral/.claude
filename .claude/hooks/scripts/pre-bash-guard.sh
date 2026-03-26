@@ -19,31 +19,34 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-# Patterns that should never run unintentionally
-DANGEROUS_PATTERNS=(
-  "rm -rf /"
-  "rm -rf ~"
-  "rm -rf \.\."
-  "mkfs\."
-  "dd if="
-  "> /dev/sd"
-  "chmod -R 777 /"
-  ":(){ :|:& };:"
-  "DROP TABLE"
-  "DROP DATABASE"
-  "TRUNCATE TABLE"
-  "--no-preserve-root"
-  "curl.*| *bash"
-  "curl.*| *sh"
-  "wget.*| *bash"
-  "wget.*| *sh"
-)
+# Convert to lowercase for case-insensitive matching
+CMD_LOWER=$(echo "$COMMAND" | tr '[:upper:]' '[:lower:]')
 
-for PATTERN in "${DANGEROUS_PATTERNS[@]}"; do
-  if echo "$COMMAND" | grep -qiE "$PATTERN"; then
-    echo "BLOCKED: Command matches dangerous pattern '$PATTERN'. Review and run manually if intended."
-    exit 2
-  fi
-done
+# Block dangerous patterns using bash built-in matching
+BLOCKED=""
+
+case "$CMD_LOWER" in
+  *"rm -rf /"*)       BLOCKED="rm -rf /" ;;
+  *"rm -rf ~"*)       BLOCKED="rm -rf ~" ;;
+  *"rm -rf .."*)      BLOCKED="rm -rf .." ;;
+  *"mkfs."*)          BLOCKED="mkfs" ;;
+  *"dd if="*)         BLOCKED="dd if=" ;;
+  *"> /dev/sd"*)      BLOCKED="> /dev/sd" ;;
+  *"chmod -r 777 /"*) BLOCKED="chmod -R 777 /" ;;
+  *":(){ :|:& };:"*)  BLOCKED="fork bomb" ;;
+  *"drop table"*)     BLOCKED="DROP TABLE" ;;
+  *"drop database"*)  BLOCKED="DROP DATABASE" ;;
+  *"truncate table"*) BLOCKED="TRUNCATE TABLE" ;;
+  *"no-preserve-root"*) BLOCKED="--no-preserve-root" ;;
+  *"curl "*"|"*"bash"*) BLOCKED="curl pipe to bash" ;;
+  *"curl "*"|"*" sh"*)  BLOCKED="curl pipe to sh" ;;
+  *"wget "*"|"*"bash"*) BLOCKED="wget pipe to bash" ;;
+  *"wget "*"|"*" sh"*)  BLOCKED="wget pipe to sh" ;;
+esac
+
+if [ -n "$BLOCKED" ]; then
+  echo "BLOCKED: Command matches dangerous pattern '$BLOCKED'. Review and run manually if intended."
+  exit 2
+fi
 
 exit 0
