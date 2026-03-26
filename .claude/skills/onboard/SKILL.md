@@ -163,8 +163,11 @@ Make all changes based on Phase 1 findings and Phase 2 answers.
 
 ### 3d. Update .claude/rules/
 
-- **code-quality.md** — adjust rules to match detected stack conventions
+- **README.md** — keep it as guidance; do not treat it as an enforcement rule
 - **common-mistakes.md** — do NOT auto-fill. This is user-curated over time. Just leave the template as-is and remind the user to add their own patterns as they encounter them
+- **safety-baseline.md** — keep as reference-only; enforcement lives in `settings.json` + `pre-bash-guard.sh`
+- Follow the control-surface matrix in `.claude/rules/README.md` (rule vs permissions vs hook) when applying project-specific controls
+- Add stack-specific rule files (for example `typescript.md`, `go.md`, `terraform.md`) based on detected conventions
 - **frontend-example.md** — if frontend detected, update paths to match actual structure; if no frontend, delete the file
 - Add new path-specific rules if warranted (e.g., `api-rules.md` with `paths: ["api/**"]`)
 - For **Mode C/D** (monorepo/multi-service): add per-service path rules

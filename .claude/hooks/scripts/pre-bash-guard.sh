@@ -1,11 +1,7 @@
 #!/bin/bash
-# PreToolUse hook — block dangerous Bash commands before execution
-# Claude Code passes hook input as JSON via stdin.
-# Returns exit code 2 to block the command with a reason message.
-#
-# Usage: add under PreToolUse in .claude/settings.json with matcher "Bash"
-#
-# Requires: jq (brew install jq / apt-get install jq)
+# PreToolUse hook — advanced Bash guard.
+# Single-source policy lives in .claude/settings.json (allow/deny).
+# This hook only blocks patterns that are hard to model in permissions.
 
 INPUT=$(cat 2>/dev/null || true)
 
@@ -19,25 +15,17 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-# Convert to lowercase for case-insensitive matching
+# Convert to lowercase for case-insensitive matching.
 CMD_LOWER=$(echo "$COMMAND" | tr '[:upper:]' '[:lower:]')
 
-# Block dangerous patterns using bash built-in matching
+# Keep this list small: pipe-to-shell and destructive SQL keywords.
 BLOCKED=""
 
 case "$CMD_LOWER" in
-  *"rm -rf /"*)       BLOCKED="rm -rf /" ;;
-  *"rm -rf ~"*)       BLOCKED="rm -rf ~" ;;
-  *"rm -rf .."*)      BLOCKED="rm -rf .." ;;
-  *"mkfs."*)          BLOCKED="mkfs" ;;
-  *"dd if="*)         BLOCKED="dd if=" ;;
-  *"> /dev/sd"*)      BLOCKED="> /dev/sd" ;;
-  *"chmod -r 777 /"*) BLOCKED="chmod -R 777 /" ;;
   *":(){ :|:& };:"*)  BLOCKED="fork bomb" ;;
   *"drop table"*)     BLOCKED="DROP TABLE" ;;
   *"drop database"*)  BLOCKED="DROP DATABASE" ;;
   *"truncate table"*) BLOCKED="TRUNCATE TABLE" ;;
-  *"no-preserve-root"*) BLOCKED="--no-preserve-root" ;;
   *"curl "*"|"*"bash"*) BLOCKED="curl pipe to bash" ;;
   *"curl "*"|"*" sh"*)  BLOCKED="curl pipe to sh" ;;
   *"wget "*"|"*"bash"*) BLOCKED="wget pipe to bash" ;;

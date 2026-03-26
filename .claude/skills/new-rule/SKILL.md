@@ -1,108 +1,167 @@
 ---
 name: new-rule
 description: >
-  Add a new Claude Code rule following project conventions. Use when the user
-  says "new rule", "add rule", "create rule", "yeni rule ekle", or wants to
-  enforce a consistent behavior across sessions.
+  Add a new Claude Code control following project conventions. Use when the user
+  says "new rule", "add rule", "create rule", "yeni rule ekle", or wants
+  to enforce behavior consistently. This workflow can update rule files,
+  settings.json permissions, and hooks in one pass.
 argument-hint: "<rule-name> [description]"
 allowed-tools: Read, Glob, Write, Edit
 disable-model-invocation: true
 ---
 
-# New rule scaffold
+# New rule / control scaffold
 
-Target rule name: $ARGUMENTS
+Target name: $ARGUMENTS
 
 ## Step 1 — Parse intent
 
 From `$ARGUMENTS`, extract:
 
-- **rule-name**: lowercase, hyphen-separated (e.g., `no-direct-db-writes`)
-- **purpose**: what behavior this rule enforces (if not given, ask)
+- **name**: lowercase, hyphen-separated (e.g., `no-direct-db-writes`)
+- **purpose**: what behavior or risk should be controlled (if not given, ask)
 
-If rule-name is missing, stop and ask.
+If name is missing, stop and ask.
 
-## Step 2 — Check for conflicts
+## Step 2 — Read current control surfaces
 
-Glob `.claude/rules/` — list existing rule files.
+Read these files before proposing anything:
 
-If a rule with the same name exists, stop and say so. If the purpose overlaps with an existing rule, point it out and ask: "Should I update the existing rule instead?"
+- `.claude/rules/README.md`
+- `.claude/settings.json`
+- `.claude/hooks/scripts/pre-bash-guard.sh`
+- Glob `.claude/rules/*.md` and list existing rule files
 
-## Step 3 — Gather information (ask all at once)
+If a same-name file already exists, stop and suggest `/update-rule <name>`.
+
+## Step 2.5 — Quick overlap check (mandatory for rule text)
+
+If a rule file will be created or updated, run a fast overlap scan across `.claude/rules/*.md` (exclude `README.md`):
+
+- Compare **intent**: does an existing rule already enforce the same behavior?
+- Compare **scope**: are the same paths/files targeted?
+- Compare **directives**: do "Always/Never/Prefer" lines overlap or contradict?
+
+If overlap is found, do not create a parallel rule by default. Ask:
 
 ```text
-A few things before I write the rule:
-
-1. **Scope**: Should this apply everywhere, or only to specific file paths?
-   - Global → loads every session
-   - Path-specific → only loads when Claude touches matching files
-   If path-specific, which paths? (e.g., "api/**", "*.tf", "src/db/**")
-
-2. **The rule itself**: What should Claude always do, never do, or be aware of?
-   Write it as you'd say it out loud — I'll format it properly.
-
-3. **Why**: What's the motivation? A past incident, a team convention, a risk you want to avoid?
-   This goes into the rule as context so future-you understands why it exists.
-
-4. **Token sensitivity**: Is this rule critical enough to load every session,
-   or is it reference material that can live in references/?
-   (Critical = always loaded. Reference = loaded on explicit request.)
+I found overlap with <existing-rule>. Should I update that rule instead of creating a new one?
 ```
 
-Wait for answers before proceeding.
+If overlap is partial, merge missing directives into the existing rule when possible and keep one source of truth.
 
-## Step 4 — Write the rule file
+## Step 3 — Choose enforcement surface (required)
 
-### Global rule → `.claude/rules/<rule-name>.md`
+Classify the request with this matrix:
 
-```markdown
-<!-- <rule-name>.md -->
-<!-- Scope: global — loads every session -->
+- **Rule file (`.claude/rules/*.md`)**:
+  Use for behavioral guidance, architecture conventions, review expectations, and path-scoped coding rules.
+- **Permissions (`.claude/settings.json`)**:
+  Use for command-level allow/deny controls.
+- **Hook (`.claude/hooks/scripts/*.sh`)**:
+  Use for runtime checks and advanced patterns not expressible in permissions.
+- **Hybrid (Rule + Permissions and/or Hook)**:
+  Use when policy intent and technical enforcement are both needed.
 
-# <Rule title>
+If the intent is ambiguous, ask one question:
 
-<The rule, written as clear directives. Use bullet points for multiple items.>
-
-<!-- Why: <motivation — incident, convention, or risk> -->
+```text
+Should this be enforced as:
+1) guidance in a rule file,
+2) command restriction in settings.json,
+3) runtime guard in a hook,
+or a combination?
 ```
 
-### Path-specific rule → `.claude/rules/<rule-name>.md` with frontmatter
+## Step 4 — Gather missing details (ask once)
+
+Ask only for missing fields:
+
+```text
+To create this cleanly, I need:
+
+1. Scope for rule text (global or path-specific, and path globs if scoped)
+2. Directives (Always/Never/Prefer ...)
+3. Command patterns to allow/deny (if permissions update is needed)
+4. Advanced risky patterns (if hook update is needed)
+5. Why this exists (incident/convention/risk)
+```
+
+## Step 5 — Apply all required changes in one pass
+
+### 5A) Rule file (if selected)
+
+Create `.claude/rules/<name>.md`.
+
+- Use concise directives.
+- Keep under 10 lines.
+- If scoped, add `paths` frontmatter.
+- Add one `Why` comment.
+- If command restrictions are enforced in settings/hook, keep rule text high-level and reference source of truth.
+
+Template:
 
 ```markdown
 ---
 paths:
   - "<glob pattern>"
-  - "<glob pattern>"
 ---
 
 # <Rule title>
 
-<The rule content.>
+- Always <directive>
+- Never <directive>
 
 <!-- Why: <motivation> -->
 ```
 
-**Formatting rules:**
+If global, omit frontmatter.
 
-- Keep it under 10 lines — rules load every session, token cost matters
-- Use directives ("Always X", "Never Y", "Prefer X over Y") not explanations
-- If the rule needs more context, put the explanation in a `Why:` comment at the bottom, not in the rule itself
-- Do NOT add rules that duplicate what's already in `code-quality.md` or `common-mistakes.md`
+### 5B) Permissions (if selected)
 
-## Step 5 — Token check
+Edit `.claude/settings.json`:
 
-After writing, count the approximate lines added across all `rules/` files.
+- Add exact entries to `permissions.allow` or `permissions.deny`.
+- Keep existing entries intact.
+- If an entry exists in the opposite list, ask whether to remove the opposite entry.
+- Avoid duplicates.
 
-If the combined `CLAUDE.md` + `rules/` content is approaching 500 tokens (rough guide: ~400 lines total), warn:
-"The rules/ directory is getting large. Consider archiving the least-used rule to `docs/archive/` before adding new ones."
+Use format: `Bash(<pattern>)`.
 
-## Step 6 — Print summary
+### 5C) Hook guard (if selected)
+
+Prefer updating `.claude/hooks/scripts/pre-bash-guard.sh` unless user explicitly requested a new hook.
+
+- Add only advanced patterns not representable as permission patterns.
+- Keep guard list short and security-focused.
+- Avoid duplicating settings deny entries.
+
+If a new hook is explicitly requested, create script in `.claude/hooks/scripts/` and wire it in `.claude/settings.json`.
+
+## Step 6 — Consistency checks (mandatory)
+
+Before finishing:
+
+1. No exact command restriction duplicated between rule text and settings/hook.
+2. No duplicate patterns inside allow/deny or hook case blocks.
+3. Rule text references enforcement sources when hybrid:
+   - `.claude/settings.json`
+   - `.claude/hooks/scripts/pre-bash-guard.sh`
+4. Tier 1 remains concise.
+5. No semantic overlap or contradiction with existing rule files (except intentional supersets documented in `Why`).
+
+## Step 7 — Print summary
 
 ```text
-Created: .claude/rules/<rule-name>.md
-Scope: <global / path-specific: "pattern">
-Loads: <every session / only when touching matching files>
+Created/Updated controls:
+- Rule: <path or "none">
+- Permissions: <changed keys or "none">
+- Hook: <changed script or "none">
 
-If this rule addresses a recurring mistake, also add it to:
-  .claude/rules/common-mistakes.md  (if under 10 items)
+Enforcement mapping:
+- Intent/policy: <rule file or "n/a">
+- Command-level enforcement: .claude/settings.json
+- Runtime/pattern guard: <hook path or "n/a">
 ```
+
+If this addresses a recurring mistake, suggest adding one concise item to `.claude/rules/common-mistakes.md` (max 10).

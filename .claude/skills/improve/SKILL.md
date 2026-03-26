@@ -2,8 +2,9 @@
 name: improve
 description: >
   Analyze accumulated feedback memories and turn recurring patterns into
-  permanent rules or common-mistakes entries. Use when the user says "improve",
-  "iyileştir", "apply feedback", "kurallaştır", or "turn feedback into rules".
+  permanent controls (rules, permissions, hooks) or common-mistakes entries.
+  Use when the user says "improve", "iyileştir", "apply feedback",
+  "kurallaştır", or "turn feedback into rules".
 argument-hint: "[area-keyword]"
 allowed-tools: Read, Glob, Grep, Edit, Write, Bash(rm *)
 disable-model-invocation: true
@@ -48,7 +49,7 @@ For each area, apply thresholds:
 | ----- | ------------------------------------------------- |
 | 1-2   | Skip — not a pattern yet, memory is sufficient    |
 | 3-4   | Suggest adding to `common-mistakes.md`            |
-| 5+    | Suggest creating a permanent rule via `/new-rule` |
+| 5+    | Suggest creating a permanent control via `/new-rule` |
 
 Print a summary:
 
@@ -73,11 +74,11 @@ Before acting, verify constraints:
    - If at 8-9 items → warn that capacity is almost full
 
 2. Glob `.claude/rules/*.md` — estimate total token budget
-   - If approaching ~500 tokens → warn before creating a new rule
+   - If approaching ~500 tokens → warn before creating a new rule file
 
-3. Check if a rule already exists for this area
+3. Check if a control already exists for this area
    - Glob `.claude/rules/` for files matching the area keyword
-   - If found → suggest updating the existing rule instead of creating a new one
+   - If found → suggest updating the existing control instead of creating a new one
 
 ## Step 6 — Execute action
 
@@ -100,37 +101,38 @@ Before acting, verify constraints:
 4. Edit `.claude/rules/common-mistakes.md` — append the new numbered item
 5. Proceed to Step 7 (cleanup)
 
-### For rules (5+ feedback entries):
+### For controls (5+ feedback entries):
 
-1. Synthesize feedback entries into a rule description
-2. Show the proposed rule to the user:
+1. Synthesize feedback entries into a control description
+2. Show the proposed control to the user:
 
    ```text
-   Proposed rule from <N> feedback entries:
+   Proposed control from <N> feedback entries:
 
    Name: <area>-conventions
-   Scope: <global or path-specific based on feedback context>
+   Surface: <rule / permissions / hook / hybrid>
+   Scope: <global or path-specific if rule is involved>
    Content:
      - <directive 1>
      - <directive 2>
      - ...
 
-   Create this rule? (I'll use /new-rule to scaffold it properly)
+   Create this control? (I'll use /new-rule to scaffold it properly)
    ```
 
 3. Wait for user approval. If rejected, stop — leave memories unchanged.
-4. Provide the rule details so the user can invoke `/new-rule <name>` with context,
-   or directly write the rule file following the same format as `/new-rule` Step 4
+4. Provide the control details so the user can invoke `/new-rule <name>` with context,
+   or directly apply changes following `/new-rule` surface classification
 
 ## Step 7 — Clean up resolved feedback
 
-After successfully creating a rule or common-mistake entry:
+After successfully creating a control or common-mistake entry:
 
 1. List the feedback memory files that were consumed
 2. Ask the user:
 
    ```text
-   These feedback memories are now captured as a <rule/common-mistake>:
+   These feedback memories are now captured as a <control/common-mistake>:
      - memory/<file1>.md
      - memory/<file2>.md
      - ...
@@ -146,7 +148,7 @@ After successfully creating a rule or common-mistake entry:
 ```text
 === Done ===
 
-Action: <Added to common-mistakes.md / Created rule <name>.md>
+Action: <Added to common-mistakes.md / Created control <name>>
 Source: <N> feedback memories from <area>
 Cleaned up: <N files deleted / no files deleted>
 

@@ -1,113 +1,123 @@
 ---
 name: update-rule
 description: >
-  Update an existing Claude Code rule and optionally graduate it to docs/learnings/.
+  Update an existing Claude Code rule and keep enforcement surfaces consistent.
   Use when the user says "update rule", "change rule", "rule güncelle", or
-  "update-rule <name>".
+  "update-rule <name>". This workflow can update rule text, settings.json,
+  and hooks together when needed.
 argument-hint: "<rule-name>"
 allowed-tools: Read, Glob, Write, Edit
 disable-model-invocation: true
 ---
 
-# Update rule
+# Update rule / control
 
 Target rule: $ARGUMENTS
 
-## Step 1 — Find the rule
+## Step 1 — Find and read current state
 
-If no argument given, Glob `.claude/rules/` and list available rules, then ask which one to update.
+- If no argument is given, glob `.claude/rules/*.md`, list available rules, and ask which one to update.
+- Read the selected rule.
+- Read `.claude/rules/README.md`, `.claude/settings.json`, and `.claude/hooks/scripts/pre-bash-guard.sh`.
 
-Otherwise, look for `.claude/rules/<rule-name>.md`. If not found, stop and say so.
+If the file is missing, stop and say so.
 
-## Step 2 — Read and show the current rule
+## Step 2 — Show current rule and ask for change
 
-Read the file. Print the current content to the user so they can see what they're changing.
-
-## Step 3 — Ask what to change
-
-```text
-Current rule: <rule-name>
-
-What would you like to change?
-1. The rule content itself
-2. The scope (add/change path restrictions)
-3. Both
-
-Also: Why is this changing?
-(Knowing the reason helps decide whether this belongs in docs/learnings/ as a permanent record.)
-```
-
-Wait for answer.
-
-## Step 4 — Apply the change
-
-Edit `.claude/rules/<rule-name>.md` with the requested changes.
-
-Keep the same formatting conventions:
-- Under 10 lines
-- Directives only ("Always X", "Never Y")
-- Motivation in a `<!-- Why: ... -->` comment at the bottom
-
-If the scope is changing to path-specific, add frontmatter:
-
-```markdown
----
-paths:
-  - "<glob pattern>"
----
-```
-
-If removing path restriction, remove the frontmatter block.
-
-## Step 5 — Decide whether to graduate to docs/learnings/
-
-After applying the change, ask:
+Print the current rule content, then ask:
 
 ```text
-Should I record why this rule was changed in docs/learnings/?
+What should change in this control?
 
-Graduate if:
-- The old rule caused a real incident or recurring problem
-- The reasoning behind the change is non-obvious
-- Future team members would benefit from knowing the history
+1. Rule text/scope only
+2. Enforcement only (settings.json and/or hook)
+3. Both rule text and enforcement
 
-Skip if:
-- It's a minor wording fix
-- The reason is obvious from the rule itself
+Also: why is this changing?
 ```
 
-If yes → create `docs/learnings/YYYY-MM-DD-<rule-name>-update.md`:
+If the user asks for command restrictions or runtime guards, classify as enforcement work automatically.
 
-```markdown
-# Rule update: <rule-name>
+## Step 3 — Apply requested change
 
-**Date**: <today's date>
+### 3A) Rule text/scope updates
 
-## What changed
+Edit `.claude/rules/<rule-name>.md`:
 
-<brief diff in plain language — not the raw diff>
+- Keep directives concise.
+- Keep under 10 lines.
+- Keep or update `paths` frontmatter only when needed.
+- Keep a single `Why` comment.
 
-## Why
+### 3B) Permissions updates (if needed)
 
-<the reason the user gave>
+Edit `.claude/settings.json`:
 
-## Before
+- Add/remove entries in `permissions.allow` and/or `permissions.deny`.
+- Avoid duplicates.
+- If a pattern exists in the opposite list, ask before removing.
 
-<old rule content>
+### 3C) Hook updates (if needed)
 
-## After
+Edit `.claude/hooks/scripts/pre-bash-guard.sh` when advanced patterns are required.
 
-<new rule content>
-```
+- Keep only patterns not representable in permissions.
+- Avoid duplicating settings deny entries.
+- Keep guard list short.
 
-## Step 6 — Token check
+## Step 3.5 — Cross-rule overlap check (mandatory when rule text changes)
 
-After editing, check if `rules/` is growing large. If the combined rules are approaching verbose, suggest archiving the least-used rule.
+When rule content or scope changes, quickly scan other files in `.claude/rules/*.md` (exclude `README.md` and the target rule):
 
-## Step 7 — Print summary
+- Check for duplicated directives.
+- Check for contradictory directives.
+- Check for overlapping path scopes that would make one rule redundant.
+
+If overlap exists, prefer consolidation:
+
+- Merge into the stronger existing rule, or
+- Keep both only if scopes are clearly distinct and documented in each `Why` comment.
+
+## Step 4 — Consistency and dedup checks (mandatory)
+
+Before finishing, enforce all:
+
+1. No exact command restriction duplicated between rule text and settings/hook.
+2. No duplicate patterns inside allow/deny or hook case blocks.
+3. If hybrid control is used, rule text references the enforcement source of truth (`settings.json` and/or guard hook) without restating exact patterns.
+4. No unresolved overlap/contradiction with other rule files.
+
+If the updated rule became pure command enforcement with no behavioral value, ask whether to:
+
+- keep a short reference rule, or
+- retire the rule and keep enforcement only in settings/hook.
+
+## Step 5 — Decide whether to record learning
+
+Ask:
 
 ```text
-Updated: .claude/rules/<rule-name>.md
-Scope: <global / path-specific>
+Should I record why this control changed in docs/learnings/?
+```
+
+If yes, create `docs/learnings/YYYY-MM-DD-<rule-name>-update.md` with:
+
+- what changed
+- why
+- before (rule text)
+- after (rule text)
+- enforcement changes in settings/hook
+
+## Step 6 — Print summary
+
+```text
+Updated controls:
+- Rule: .claude/rules/<rule-name>.md (or "unchanged")
+- Permissions: <changed keys or "unchanged">
+- Hook: <changed script or "unchanged">
+
+Consistency checks:
+- Rule/enforcement duplication: cleared
+- Source of truth references: verified
 [Recorded: docs/learnings/YYYY-MM-DD-<rule-name>-update.md]
 ```

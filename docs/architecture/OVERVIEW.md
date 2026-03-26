@@ -10,7 +10,7 @@ A 3-tier context architecture for Claude Code projects. Controls token budget by
 ```
 Tier 1 (always loaded, ~500 tokens)
 ├── CLAUDE.md              — project conventions & constraints
-└── .claude/rules/*.md     — hard rules (code-quality, common-mistakes)
+└── .claude/rules/*.md     — hard rules (common-mistakes, safety-baseline, project-specific rules)
 
 Tier 2 (loaded on demand)
 ├── .claude/skills/        — deterministic workflows triggered by user
@@ -56,6 +56,7 @@ User request
 3. **Stdin JSON, not positional args** — Claude Code passes hook context via stdin as JSON. All hook scripts use `jq` to parse, never `$1`. This is the #1 gotcha for new hook authors.
 4. **Token budget cap** — Tier 1 stays under ~500 tokens. If rules grow, archive or graduate the least critical ones. Skills/agents are Tier 2 and don't count toward this budget.
 5. **Deterministic skills by default** — `disable-model-invocation: true` ensures skills follow their steps exactly. Only remove this for skills that genuinely need creative interpretation.
+6. **Single-source enforcement model** — Use rules for policy intent, `settings.json` for command-level access, and hooks only for advanced runtime patterns. Avoid duplicating exact restrictions across these surfaces.
 
 ## Dependency map
 

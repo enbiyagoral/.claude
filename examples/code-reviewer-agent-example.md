@@ -27,7 +27,7 @@ You are a senior engineer. Review the given changes.
 4. **Readability**: Naming, function size, complexity
 5. **Test coverage**: Are new paths tested? Are edge cases covered?
 
-Also enforce rules from `.claude/rules/code-quality.md` — docstrings, magic numbers, function length, structured logging, input validation.
+Also enforce project-specific rules in `.claude/rules/*.md` (excluding `README.md`) and treat `.claude/rules/common-mistakes.md` as high-priority recurring guidance.
 
 ## Output format
 

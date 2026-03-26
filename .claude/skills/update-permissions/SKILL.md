@@ -13,6 +13,14 @@ disable-model-invocation: true
 
 Request: $ARGUMENTS
 
+## Step 0 — Scope check
+
+Use this workflow only for command-level access control.
+
+- If the user wants behavioral guidance, create or update a rule file instead.
+- If the user wants runtime/pattern checks that permissions cannot express, use a hook (usually `pre-bash-guard.sh`).
+- If the user wants both policy and enforcement, apply permissions here and update the rule text to reference settings as source of truth.
+
 ## Step 1 — Parse intent
 
 From `$ARGUMENTS`, determine:
@@ -60,6 +68,7 @@ Added to <allow|deny>: "Bash(<pattern>)"
 Note: allow = Claude proceeds without prompting
       deny  = always blocked, even with user approval
       Conflicts: deny takes precedence over allow.
+      If policy intent is also needed, keep it in a rule file without duplicating exact command patterns.
 ```
 
 If the change was to deny a previously allowed pattern, remind:

@@ -29,6 +29,12 @@ Glob `.claude/hooks/scripts/` to see existing scripts.
 
 If a hook with the same name or same purpose already exists, stop and say so.
 
+Before continuing, classify the request:
+
+- If it is command allow/deny, do NOT create a hook; use `/update-permissions`.
+- If it is behavioral guidance, do NOT create a hook; use `/new-rule`.
+- If it needs deterministic runtime checks not expressible in permissions, continue with this hook workflow.
+
 ## Step 3 — Gather information (ask all at once)
 
 ```text

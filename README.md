@@ -47,14 +47,14 @@ Detects your stack, configures `CLAUDE.md` + `settings.json` + rules + hooks. Fo
 | --- | --- |
 | `/new-skill <name>` | Create SKILL.md, optionally add references/ and scripts/ |
 | `/new-agent <name>` | 2-turn interview → Type A (subagent) or Type B (autonomous: AGENT.md + HEARTBEAT.md + MEMORY.md + RULES.md) |
-| `/new-rule <name>` | Create global or path-scoped rule |
+| `/new-rule <name>` | Create a control with the right surface (rule, settings permission, hook, or hybrid) |
 | `/new-hook <name>` | Write hook script + wire into settings.json |
 
 ### Manage
 
 | Trigger | What it does |
 | --- | --- |
-| `/update-rule <name>` | Edit rule, optionally record why in docs/learnings/ |
+| `/update-rule <name>` | Update rule text and related enforcement surfaces consistently |
 | `/update-permissions` | Add allow/deny to settings.json |
 | `/graduate <item>` | Move common-mistakes item to docs/learnings/ |
 | `/retire-agent <name>` | Archive agent (reversible) — moves to agents/archive/ |
