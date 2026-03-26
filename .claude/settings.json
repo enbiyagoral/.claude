@@ -51,6 +51,26 @@
             "command": "echo '✓ lint auto-ran'"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/scripts/post-write-format.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/scripts/stop-uncommitted-warn.sh"
+          }
+        ]
       }
     ]
   }
