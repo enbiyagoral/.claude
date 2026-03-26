@@ -68,6 +68,12 @@ Detects your stack, configures `CLAUDE.md` + `settings.json` + rules + hooks. Fo
 | `/agent-status <name>` | Last journal entry, KPI progress, recent outputs |
 | `/context-check` | Session health — compact/commit recommendation |
 
+## Community
+
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+- [Support](SUPPORT.md)
+
 ## License
 
 [MIT](LICENSE)

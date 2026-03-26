@@ -1,0 +1,40 @@
+name: Question
+description: Ask for usage or setup help
+title: "[question]: "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question.
+        For security concerns, please use SECURITY.md instead of public issues.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What do you need help with?
+      placeholder: Ask clearly so maintainers or contributors can help quickly
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What have you tried so far?
+      placeholder: Commands, files, or docs you checked
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Share environment details if relevant
+      placeholder: |
+        - OS:
+        - Shell:
+        - Claude Code context:
+        - Repo commit/branch:
