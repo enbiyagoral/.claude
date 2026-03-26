@@ -1,8 +1,11 @@
 # Common mistakes
 
-<!-- Keep under 10 items. Graduate resolved ones to docs/learnings/.
-     This file loads every session — keep it lean. -->
+<!-- Keep under 10 items. Graduate resolved ones to docs/learnings/ via /graduate.
+     This file loads every session (Tier 1) — keep it lean and project-specific.
 
-1. **Hook stdin, not args** — Claude Code hooks receive JSON via stdin, not positional arguments. Use `jq` to parse, not `$1`.
-2. **Don't use `cat/grep/find` in Bash** — Claude has dedicated Read/Grep/Glob tools that are cheaper and more reliable.
-3. **Read before Edit** — the Edit tool fails if you haven't Read the file first in the same session.
+     TEMPLATE: Replace these placeholders with mistakes specific to YOUR project.
+     Each entry should be a recurring gotcha that Claude keeps hitting. -->
+
+1. **[Mistake title]** — [What goes wrong and the correct approach]
+2. **[Mistake title]** — [What goes wrong and the correct approach]
+3. **[Mistake title]** — [What goes wrong and the correct approach]
