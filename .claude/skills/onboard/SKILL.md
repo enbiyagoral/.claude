@@ -2,13 +2,42 @@
 name: onboard
 description: >
   Project onboarding and template setup. Use when the user says onboard, setup,
-  initialize, init, configure this project, or first-time setup.
+  initialize, init, configure this project, or first-time setup. Guides through
+  detecting project mode and stack, configuring CLAUDE.md, permissions, hooks,
+  rules, and architecture docs.
 argument-hint: "[project-path]"
-allowed-tools: Read, Glob, Grep, Bash(ls *), Bash(find *), Bash(git branch -r *), Edit, Write
+allowed-tools: Read, Glob, Grep, Bash(ls *), Bash(find *), Bash(git branch -r *), Edit, Write, AskUserQuestion
 disable-model-invocation: true
 ---
 
-# Project onboarding
+# Project Onboarding for Claude Code
+
+This skill configures the Claude Code template for a specific project. It detects the project's mode, stack, and conventions, then tailors CLAUDE.md, permissions, hooks, rules, and docs to match.
+
+## Before You Begin: Understand the Onboarding Model
+
+Onboarding transforms a generic template into a project-specific Claude Code setup. The goal is **maximum auto-detection, minimum questions**.
+
+### Onboarding principles
+
+1. **Detect, don't ask.** Everything derivable from files (stack, conventions, CI/CD, structure) should be auto-detected. Only ask about things truly invisible in code.
+2. **Confirm mode once, then proceed.** Don't ask the user to validate every finding — state what you found and move on.
+3. **Preserve user customizations on re-onboard.** If `memory/onboard.md` exists, this is a re-onboard. Read it, detect what changed, update only what's new.
+4. **One pass, all surfaces.** Configure CLAUDE.md, permissions, hooks, rules, and docs together — don't make the user run multiple setup commands.
+5. **Leave room for growth.** Don't auto-fill `common-mistakes.md` or create rules for hypothetical problems. Set up the structure; let the user populate it through real usage.
+
+### What gets configured
+
+| File                            | What changes                                             | Why                                                  |
+| ------------------------------- | -------------------------------------------------------- | ---------------------------------------------------- |
+| `CLAUDE.md`                     | Project description, structure, build/test/lint commands | Agent needs project context every session            |
+| `.claude/settings.json`         | Permissions for detected tools                           | Security: only allow what's needed                   |
+| `.claude/hooks/scripts/`        | Linter cases for detected languages                      | Post-edit quality checks                             |
+| `.claude/rules/`                | Stack-specific rule files                                | Coding conventions, architecture boundaries          |
+| `docs/architecture/OVERVIEW.md` | Service map, dependencies, data flow                     | Agent needs system context for cross-cutting changes |
+| `.claudeignore`                 | Stack-specific large directories                         | Token efficiency                                     |
+
+---
 
 Target: $ARGUMENTS
 
@@ -18,7 +47,7 @@ Run these phases in order. Do NOT skip ahead — each phase informs the next.
 
 ---
 
-## Phase 1 — Detect mode and stack (automatic)
+## Phase 1 — Detect Mode and Stack
 
 ### Step 1: Determine project mode
 
@@ -31,64 +60,69 @@ Scan the project root to understand what kind of project this is:
 
 Determine the mode:
 
-**Mode A — Single project**: One stack file at root, one `.git/`. Most common case.
-
-**Mode B — Fresh project**: Template placeholders present, no source files yet. In Phase 2, ask what they're building. In Phase 3, configure with sensible defaults.
-
-**Mode C — Monorepo**: Monorepo marker found at root (`turbo.json`, `nx.json`, etc.) with multiple packages/services sharing a build system.
-
-**Mode D — Multi-service**: Multiple subdirectories each with their own stack file (`go.mod`, `package.json`, etc.) but sharing a single `.git/`. Independent services in one repo.
-
-**Mode E — Modular monolith**: Single stack file at root but domain-separated folders (`src/modules/`, `internal/domains/`, etc.). One deployable, organized by domain.
-
-**Mode F — Multi-repo**: Subdirectories each have their own `.git/` — independently cloned repos living side by side. No root-level stack file.
+| Mode  | Name             | Indicators                                              | Key difference                          |
+| ----- | ---------------- | ------------------------------------------------------- | --------------------------------------- |
+| **A** | Single project   | One stack file at root, one `.git/`                     | Most common case                        |
+| **B** | Fresh project    | Template placeholders present, no source files          | Ask what they're building               |
+| **C** | Monorepo         | Monorepo marker at root (`turbo.json`, `nx.json`, etc.) | Multiple packages, shared build system  |
+| **D** | Multi-service    | Multiple subdirs with own stack files, single `.git/`   | Independent services in one repo        |
+| **E** | Modular monolith | Single stack file, domain-separated folders             | One deployable, organized by domain     |
+| **F** | Multi-repo       | Subdirs each have own `.git/`                           | Independently cloned repos side by side |
 
 Print detected mode and ask user to confirm before continuing.
 
 ### Step 2: Detect stack (skip for Mode B)
 
-Scan for stack indicators:
+Scan for stack indicators across these categories:
 
-**Languages/frameworks:**
+#### Languages and frameworks
 
-- `package.json` → Node.js (inspect deps for `next`, `react`, `vue`, `angular`, `express`, `nestjs`, `hono`)
-- `tsconfig.json` → TypeScript
-- `go.mod` → Go
-- `Cargo.toml` → Rust
-- `pyproject.toml`, `requirements.txt` → Python (inspect for `django`, `flask`, `fastapi`)
-- `Gemfile` → Ruby (inspect for `rails`, `sinatra`)
-- `pom.xml`, `build.gradle` → Java/Kotlin
-- `*.csproj`, `*.sln` → .NET
-- `mix.exs` → Elixir
-- `composer.json` → PHP
+| File                                 | Stack       | Also check                                                              |
+| ------------------------------------ | ----------- | ----------------------------------------------------------------------- |
+| `package.json`                       | Node.js     | deps for `next`, `react`, `vue`, `angular`, `express`, `nestjs`, `hono` |
+| `tsconfig.json`                      | TypeScript  | —                                                                       |
+| `go.mod`                             | Go          | —                                                                       |
+| `Cargo.toml`                         | Rust        | —                                                                       |
+| `pyproject.toml`, `requirements.txt` | Python      | deps for `django`, `flask`, `fastapi`                                   |
+| `Gemfile`                            | Ruby        | deps for `rails`, `sinatra`                                             |
+| `pom.xml`, `build.gradle`            | Java/Kotlin | —                                                                       |
+| `*.csproj`, `*.sln`                  | .NET        | —                                                                       |
+| `mix.exs`                            | Elixir      | —                                                                       |
+| `composer.json`                      | PHP         | —                                                                       |
 
-**Project structure:**
+#### Project structure patterns
 
-- `src/`, `app/`, `pages/`, `components/` → frontend patterns
-- `api/`, `server/`, `cmd/`, `internal/` → backend patterns
-- `test/`, `tests/`, `__tests__/`, `spec/` → test location and framework
-- `migrations/`, `prisma/`, `alembic/`, `drizzle/` → database tooling
+| Pattern                                          | Indicates                   |
+| ------------------------------------------------ | --------------------------- |
+| `src/`, `app/`, `pages/`, `components/`          | Frontend patterns           |
+| `api/`, `server/`, `cmd/`, `internal/`           | Backend patterns            |
+| `test/`, `tests/`, `__tests__/`, `spec/`         | Test location and framework |
+| `migrations/`, `prisma/`, `alembic/`, `drizzle/` | Database tooling            |
 
-**Infrastructure:**
+#### Infrastructure
 
-- `Dockerfile`, `docker-compose.yml` → Docker
-- `k8s/`, `helm/`, `charts/`, `manifests/` → Kubernetes
-- `*.tf` → Terraform; also check for `terragrunt.hcl` → Terragrunt
-- `pulumi/`, `Pulumi.yaml` → Pulumi
-- `ansible/`, `playbook*.yml` → Ansible
-- `serverless.yml`, `cdk.json` → Serverless/CDK
+| File                                     | Stack          | Notes                           |
+| ---------------------------------------- | -------------- | ------------------------------- |
+| `Dockerfile`, `docker-compose.yml`       | Docker         | —                               |
+| `k8s/`, `helm/`, `charts/`, `manifests/` | Kubernetes     | —                               |
+| `*.tf`                                   | Terraform      | Also check for `terragrunt.hcl` |
+| `pulumi/`, `Pulumi.yaml`                 | Pulumi         | —                               |
+| `ansible/`, `playbook*.yml`              | Ansible        | —                               |
+| `serverless.yml`, `cdk.json`             | Serverless/CDK | —                               |
 
-**CI/CD (check inside each subdirectory too, not just root):**
+#### CI/CD (check inside subdirectories too, not just root)
 
-- `.github/workflows/` → GitHub Actions
-- `.gitlab-ci.yml` → GitLab CI
-- `Jenkinsfile` → Jenkins
-- `bitbucket-pipelines.yml` → Bitbucket Pipelines
-- `.circleci/` → CircleCI
-- `.pre-commit-config.yaml` → pre-commit hooks
-- `semantic-release` config in `package.json` or `.releaserc` → semantic versioning
+| File                      | Platform            |
+| ------------------------- | ------------------- |
+| `.github/workflows/`      | GitHub Actions      |
+| `.gitlab-ci.yml`          | GitLab CI           |
+| `Jenkinsfile`             | Jenkins             |
+| `bitbucket-pipelines.yml` | Bitbucket Pipelines |
+| `.circleci/`              | CircleCI            |
+| `.pre-commit-config.yaml` | Pre-commit hooks    |
+| `semantic-release` config | Semantic versioning |
 
-**Conventions (detect from files, don't ask):**
+#### Conventions (detect from files, don't ask)
 
 - Read `README.md` in 2-3 representative subdirectories to understand project purpose
 - Check `git branch -r` in subdirectories for branch naming patterns
@@ -96,7 +130,7 @@ Scan for stack indicators:
 - Check `.editorconfig`, `.prettierrc`, `.eslintrc`, `.terraform-docs.yml` for style conventions
 - Check `Makefile` or `justfile` for build/test/lint commands
 
-**Existing docs:**
+#### Existing docs
 
 - `README.md` → project description
 - `docs/` → documentation
@@ -108,7 +142,7 @@ Summarize all findings before proceeding. The goal is to make Phase 2 unnecessar
 
 ## Phase 2 — Clarification (ONLY if Phase 1 left gaps)
 
-STRICT RULES:
+### Strict rules — what NOT to ask
 
 - Do NOT ask about anything you can detect from files (README, configs, git history, directory structure)
 - Do NOT ask the user to confirm what you already found — state it and move on
@@ -116,7 +150,9 @@ STRICT RULES:
 - Do NOT ask about conventions if config files exist (`.editorconfig`, linter configs, `Makefile`)
 - Do NOT ask about CI/CD if workflow files exist in any subdirectory
 
-The only valid questions are things truly undetectable from code:
+### The only valid questions
+
+Things truly undetectable from code:
 
 1. "Are there areas that need extra caution?" — fragile code, production-critical modules
 2. "Any external dependencies or services not visible in the code?" — private registries, internal APIs
@@ -126,13 +162,13 @@ For **Mode B** (fresh project), ask:
 1. "What are you building and with what stack?"
 2. "Will this be a monorepo, multi-service, or single project?"
 
-Ask mode confirmation once, then proceed. If Phase 1 covered everything, skip Phase 2 entirely and say so.
+Ask mode confirmation once, then proceed. If Phase 1 covered everything, **skip Phase 2 entirely** and say so.
 
 ---
 
-## Phase 3 — Apply (configure the template)
+## Phase 3 — Apply Configuration
 
-Make all changes based on Phase 1 findings and Phase 2 answers.
+Make all changes based on Phase 1 findings and Phase 2 answers. Apply everything in one pass.
 
 ### 3a. Update CLAUDE.md
 
@@ -142,18 +178,26 @@ Make all changes based on Phase 1 findings and Phase 2 answers.
 - Keep token efficiency, context management, permissions, and boundaries sections as-is
 - For **Mode F** (multi-repo): create a lightweight root CLAUDE.md listing each repo and its purpose
 
+**Principle:** CLAUDE.md is Tier 1 — loaded every session. Keep it dense and under budget (~1500 tokens with rule files combined). Put detailed docs in `docs/architecture/OVERVIEW.md` instead.
+
 ### 3b. Update .claude/settings.json permissions
 
+Configure permissions based on detected tools:
+
+| Stack      | Allow                                                      | Deny (keep out)                       |
+| ---------- | ---------------------------------------------------------- | ------------------------------------- |
+| Go         | `Bash(go *)`                                               | —                                     |
+| Rust       | `Bash(cargo *)`                                            | —                                     |
+| Python     | `Bash(pip *)`, `Bash(python -m *)`                         | —                                     |
+| Terraform  | `Bash(terraform plan *)`, `Bash(terraform validate *)`     | `terraform apply` (requires approval) |
+| Terragrunt | `Bash(terragrunt plan *)`, `Bash(terragrunt validate *)`   | `terragrunt apply *production*`       |
+| Pulumi     | `Bash(pulumi preview *)`                                   | `pulumi up` (requires approval)       |
+| Ansible    | `Bash(ansible-lint *)`, `Bash(ansible-playbook --check *)` | —                                     |
+
 - Remove permissions for tools not in use (no k8s? remove kubectl allows and deny rules)
-- Add permissions for detected tools:
-  - Go → `Bash(go *)`
-  - Rust → `Bash(cargo *)`
-  - Python → `Bash(pip *)`, `Bash(python -m *)`
-  - Terraform → `Bash(terraform plan *)`, `Bash(terraform validate *)` (keep `terraform apply` out — requires approval)
-  - Terragrunt → `Bash(terragrunt plan *)`, `Bash(terragrunt validate *)`
-  - Pulumi → `Bash(pulumi preview *)` (keep `pulumi up` out)
-  - Ansible → `Bash(ansible-lint *)`, `Bash(ansible-playbook --check *)`
-- Update deny list for detected infra (e.g., `Bash(terraform destroy *)`, `Bash(terragrunt apply *production*)`)
+- Update deny list for detected infra (e.g., `Bash(terraform destroy *)`)
+
+**Principle:** Permissions are deterministic enforcement — always run, can't be skipped. Keep `permissions.allow` minimal; add only what the active workflow needs. `git push` stays out of allow (requires approval every time).
 
 ### 3c. Update .claude/hooks/scripts/post-edit-lint.sh
 
@@ -161,59 +205,75 @@ Make all changes based on Phase 1 findings and Phase 2 answers.
 - Add cases for detected languages if missing
 - Verify the referenced linter tools exist in the project's devDependencies or toolchain
 
+**Principle:** Hooks are deterministic — they always fire. Only include linters that are actually installed. A broken hook that fails on every edit is worse than no hook.
+
 ### 3d. Update .claude/rules/
 
-- **README.md** — keep it as guidance; do not treat it as an enforcement rule
-- **common-mistakes.md** — do NOT auto-fill. This is user-curated over time. Just leave the template as-is and remind the user to add their own patterns as they encounter them
+Follow the control-surface matrix in `.claude/rules/README.md`:
+
+- **README.md** — keep as guidance; do not treat it as an enforcement rule
+- **common-mistakes.md** — do NOT auto-fill. This is user-curated over time. Leave the template as-is and remind the user to add patterns as they encounter them
 - **safety-baseline.md** — keep as reference-only; enforcement lives in `settings.json` + `pre-bash-guard.sh`
-- Follow the control-surface matrix in `.claude/rules/README.md` (rule vs permissions vs hook) when applying project-specific controls
-- Add stack-specific rule files (for example `typescript.md`, `go.md`, `terraform.md`) based on detected conventions
-- **examples/frontend-rule-example.md** — if frontend detected, copy to `.claude/rules/frontend.md` and update paths to match actual structure; if no frontend, skip this step
-- Add new path-specific rules if warranted (e.g., `api-rules.md` with `paths: ["api/**"]`)
-- For **Mode C/D** (monorepo/multi-service): add per-service path rules
+
+Add stack-specific rule files based on detected conventions:
+
+#### When to create a rule file
+
+| Detected signal              | Rule to create                            | Example content                                        |
+| ---------------------------- | ----------------------------------------- | ------------------------------------------------------ |
+| TypeScript + strict tsconfig | `typescript.md`                           | "Never use `any`; prefer unknown + type guards"        |
+| React/Vue/Angular detected   | `frontend.md`                             | "Prefer functional components; colocate styles"        |
+| Go detected                  | `go.md`                                   | "Always handle errors; never use `_` for error return" |
+| Terraform detected           | `terraform.md`                            | "Always run `terraform validate` before plan"          |
+| API directory found          | `api-rules.md` (with `paths: ["api/**"]`) | "Always return structured error responses"             |
+| Monorepo/multi-service       | Per-service path rules                    | `paths: ["services/auth/**"]`                          |
+
+**Principle:** One concern per file. Keep each rule under 10 directive lines. Include a `Why` comment. Reference enforcement sources (settings/hook), don't restate them.
+
+If frontend is detected, check for `examples/frontend-rule-example.md` — if found, copy to `.claude/rules/frontend.md` and update paths to match actual structure.
 
 ### 3e. Clean up example skills
 
 - Glob `.claude/skills/` for any skill whose `SKILL.md` contains `<!-- example` or `# Example` in the first 5 lines
-- If no example skills found → skip this step entirely
+- If no example skills found → skip entirely
 - If found: list them and ask the user which to keep or retire
-- Do NOT delete this onboard skill — it's reusable for re-onboarding when the project evolves
+- Do NOT delete this onboard skill — it's reusable for re-onboarding
 
-### 3e-2. Suggest autonomous agents for DevOps projects
+### 3f. Suggest autonomous agents for DevOps projects
 
-If the detected stack includes any of: Terraform, Terragrunt, Pulumi, Ansible, k8s, Helm, GitHub Actions, GitLab CI, Jenkins, AWS, GCP, Azure — ask:
+If the detected stack includes any of: Terraform, Terragrunt, Pulumi, Ansible, k8s, Helm, GitHub Actions, GitLab CI, Jenkins, AWS, GCP, Azure — suggest:
 
 ```text
-I noticed this is a DevOps/infrastructure project. Would you like to set up any autonomous agents?
-These run on a schedule and track KPIs over time. A few useful examples for your stack:
+I noticed this is a DevOps/infrastructure project. Would you like to set up any
+autonomous agents? These run on a schedule and track KPIs over time:
 
 • pipeline-monitor — tracks CI/CD failure rates and flaky tests
 • drift-detector — detects infra drift between Terraform state and actual resources
 • cost-tracker — monitors cloud spend against budget targets
 • incident-logger — summarizes alerts and incident patterns from logs
 
-Type `/new-agent <name>` to set one up, or say "skip" to continue.
+Type /new-agent <name> to set one up, or say "skip" to continue.
 ```
 
-If the user responds with a name or "yes" → immediately invoke the `/new-agent` workflow with that name.
-If the user says "skip" or responds negatively → continue to Phase 4 without comment.
+If the user responds with a name → invoke `/new-agent` workflow immediately.
+If skip → continue without comment.
 
-### 3f. Update docs/architecture/OVERVIEW.md
+### 3g. Update docs/architecture/OVERVIEW.md
 
 - Fill in with detected architecture (services, dependencies, data flow)
 - For simple projects (single service), simplify the template accordingly
 - For **Mode C/D/F**: document service boundaries and inter-service communication
 
-### 3g. Update .claudeignore
+### 3h. Update .claudeignore
 
 - Add large directories specific to this project's stack
 - Remove patterns that don't apply (e.g., no Go? remove `go/pkg/`)
 
 ---
 
-## Phase 4 — Save to memory
+## Phase 4 — Save to Memory
 
-Write `memory/onboard.md` with the following content so future sessions and re-onboards have context:
+Write `memory/onboard.md` so future sessions and re-onboards have context:
 
 ```markdown
 ---
@@ -243,12 +303,107 @@ After a week or two, run /improve to turn recurring patterns into permanent rule
 
 ---
 
-## Final summary
+## Phase 5 — Final Summary
 
 After all changes, print:
 
 1. Detected mode and stack
 2. List of files modified
-3. List of files deleted
+3. List of files deleted (if any)
 4. Any manual steps the user should take (e.g., "add your API keys to .env")
 5. Suggest: "Run `git diff` to review, then commit when ready"
+
+---
+
+## Re-Onboarding Workflow
+
+When `memory/onboard.md` already exists, follow this modified flow:
+
+1. **Read previous state** from `memory/onboard.md`
+2. **Detect current state** using Phase 1
+3. **Diff the two**: what's new, what's removed, what changed?
+4. **Update only what changed** — don't regenerate everything
+5. **Preserve user customizations**: any rules, permissions, or hooks the user added after initial onboard should be kept
+6. **Update `memory/onboard.md`** with new state and date
+
+Ask: "I found these changes since last onboard: [list]. Should I apply all of them?"
+
+---
+
+## Anti-Patterns to Avoid
+
+| Anti-pattern                                  | Problem                                 | Fix                                                         |
+| --------------------------------------------- | --------------------------------------- | ----------------------------------------------------------- |
+| Asking about things visible in files          | Wastes time, annoys user                | Detect from README, configs, git history                    |
+| Auto-filling `common-mistakes.md`             | Creates rules for hypothetical problems | Leave empty; user fills from real experience                |
+| Adding permissions for unused tools           | Security surface expansion              | Only allow what's detected and needed                       |
+| Creating rules for every detected pattern     | Token budget blown, noise               | Only create rules for strong conventions with clear signals |
+| Overwriting user customizations on re-onboard | Destroys manual tuning                  | Read previous state, update only diffs                      |
+| Putting detailed docs in CLAUDE.md            | Tier 1 budget exceeded                  | CLAUDE.md for essentials; details in `docs/architecture/`   |
+| Including broken linters in hooks             | Every edit fails the hook               | Verify tool exists before adding to hook                    |
+| Asking the user to validate every finding     | Tedious, no value added                 | State what you found, move on                               |
+
+---
+
+## Complete Example
+
+**Scenario:** Onboarding a Node.js + TypeScript monorepo with React frontend and Express API.
+
+### Phase 1 detection output
+
+```text
+Mode: C (Monorepo — turbo.json detected)
+Stack:
+  - TypeScript (tsconfig.json, strict mode)
+  - React 18 (packages/web/package.json)
+  - Express + Prisma (packages/api/package.json)
+  - PostgreSQL (prisma/schema.prisma)
+Infrastructure:
+  - Docker (docker-compose.yml)
+  - GitHub Actions (.github/workflows/)
+CI/CD:
+  - PR checks: lint + test + build
+  - Deploy: main → staging, tags → production
+Conventions:
+  - ESLint + Prettier configured
+  - Conventional commits (commitlint config found)
+  - Jest for testing
+Build commands:
+  - turbo run build
+  - turbo run test
+  - turbo run lint
+```
+
+### Files modified
+
+```text
+Modified:
+  CLAUDE.md                              — project description, structure, commands
+  .claude/settings.json                  — npm/turbo/prisma permissions added
+  .claude/hooks/scripts/post-edit-lint.sh — TypeScript + ESLint cases
+  .claude/rules/typescript.md            — strict TS conventions
+  .claude/rules/frontend.md              — React patterns (paths: packages/web/**)
+  .claude/rules/api-rules.md             — API conventions (paths: packages/api/**)
+  .claudeignore                          — node_modules, .next, dist
+  docs/architecture/OVERVIEW.md          — service map, API → DB flow
+  memory/onboard.md                      — onboard results saved
+  memory/MEMORY.md                       — index updated
+```
+
+---
+
+## Verification Checklist
+
+- [ ] Mode correctly detected and confirmed by user
+- [ ] Stack detection covers languages, frameworks, infra, CI/CD, and conventions
+- [ ] Phase 2 only asked about things not detectable from files
+- [ ] CLAUDE.md updated with project-specific content, stays within token budget
+- [ ] Permissions match detected tools — nothing extra, nothing missing
+- [ ] Hook linters verified to exist before adding
+- [ ] Rule files are concise (under 10 lines each), one concern per file
+- [ ] `common-mistakes.md` left as template (not auto-filled)
+- [ ] Architecture doc filled in
+- [ ] `.claudeignore` updated for detected stack
+- [ ] Memory saved with mode, stack, and key decisions
+- [ ] User customizations preserved (on re-onboard)
+- [ ] Final summary printed with files modified and manual steps
