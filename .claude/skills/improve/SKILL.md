@@ -14,6 +14,25 @@ disable-model-invocation: true
 
 Target area: $ARGUMENTS
 
+## Step 0 — System health check
+
+Before analyzing feedback, check the overall lifecycle health:
+
+1. **Common-mistakes capacity**: Read `.claude/rules/common-mistakes.md` and count items.
+   - At 10 (full): "common-mistakes.md is at capacity. Before adding new patterns, let's graduate resolved items to docs/learnings/." Then for each item, ask if it's still active or can be graduated. Graduate resolved ones using the format in `docs/learnings/README.md` before proceeding to Step 1.
+   - At 8-9: Note that capacity is almost full. Continue to Step 1 but flag this.
+
+2. **Old learnings**: Glob `docs/learnings/*.md` (exclude README.md). Check file dates in filenames (YYYY-MM-DD prefix).
+   - Any older than 6 months? List them and ask: "These learnings are older than 6 months. Are any no longer relevant? I can archive them to docs/archive/."
+   - If user says yes → move the files to `docs/archive/` and continue.
+
+3. **Duplicate memories**: Glob `memory/*.md`. Check for files with overlapping descriptions or topics.
+   - If found → suggest merging into a single memory file.
+
+After health check, proceed to feedback analysis.
+
+---
+
 ## Step 1 — Collect feedback memories
 
 Glob `memory/*.md`. For each file, read the YAML frontmatter. Keep only files where `type: feedback`.
@@ -45,10 +64,10 @@ If `$ARGUMENTS` is empty, continue with all areas.
 
 For each area, apply thresholds:
 
-| Count | Recommendation                                    |
-| ----- | ------------------------------------------------- |
-| 1-2   | Skip — not a pattern yet, memory is sufficient    |
-| 3-4   | Suggest adding to `common-mistakes.md`            |
+| Count | Recommendation                                       |
+| ----- | ---------------------------------------------------- |
+| 1-2   | Skip — not a pattern yet, memory is sufficient       |
+| 3-4   | Suggest adding to `common-mistakes.md`               |
 | 5+    | Suggest creating a permanent control via `/new-rule` |
 
 Print a summary:
@@ -82,7 +101,7 @@ Before acting, verify constraints:
 
 ## Step 6 — Execute action
 
-### For common-mistakes (3-4 feedback entries):
+### For common-mistakes (3-4 feedback entries)
 
 1. Synthesize the feedback entries into a single, concise mistake description
 2. Show the proposed entry to the user:
@@ -101,7 +120,7 @@ Before acting, verify constraints:
 4. Edit `.claude/rules/common-mistakes.md` — append the new numbered item
 5. Proceed to Step 7 (cleanup)
 
-### For controls (5+ feedback entries):
+### For controls (5+ feedback entries)
 
 1. Synthesize feedback entries into a control description
 2. Show the proposed control to the user:

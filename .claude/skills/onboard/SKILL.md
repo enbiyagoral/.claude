@@ -347,8 +347,15 @@ Update `memory/MEMORY.md` index to include a link to `onboard.md`.
 After writing the onboard memory, print:
 
 ```text
-Tip: As you work, Claude automatically saves feedback memories when you correct it.
-After a week or two, run /improve to turn recurring patterns into permanent rules.
+The knowledge lifecycle is now automatic:
+
+  1. As you work, Claude saves corrections and discoveries to memory (every session)
+  2. When feedback patterns accumulate, the Stop hook promotes them to rules (automatic)
+  3. When common-mistakes.md fills up, resolved items graduate to docs/learnings/ (automatic)
+  4. Old learnings (6+ months) get archived to docs/archive/ (automatic)
+
+You don't need to manage this — just work normally and correct Claude when it's wrong.
+The system improves itself. Run /improve manually if you want to force a review cycle.
 ```
 
 ---

@@ -6,5 +6,5 @@
 - Keep memories actionable: what you learned + how to apply it next time
 - When discovering how something works in this project, save it as project memory
 - Enforcement: Stop hook will remind you at session end, but save during the session when possible
-
-<!-- Why: memory system is only valuable if populated proactively — waiting for explicit requests means most learnings are lost -->
+- When the Stop hook tells you to promote feedback, graduate, or archive — do it immediately, don't just acknowledge
+- The lifecycle is automatic: feedback → common-mistakes → learnings → archive. You are the executor; the Stop hook is the trigger

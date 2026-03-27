@@ -50,6 +50,7 @@ When adding or modifying this template:
 - Default to **Sonnet** for everyday tasks (edits, tests, simple bugs)
 - Use **Opus** only for complex architecture, multi-file refactoring, or deep debugging
 - Use **plan mode** (Shift+Tab) for analysis — it halves token consumption vs execute mode
+- Proactively recommend the optimal model before starting a task — enforced by `.claude/rules/model-guidance.md`
 
 ### Session hygiene
 
