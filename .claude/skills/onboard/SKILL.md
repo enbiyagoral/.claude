@@ -258,11 +258,61 @@ Type /new-agent <name> to set one up, or say "skip" to continue.
 If the user responds with a name → invoke `/new-agent` workflow immediately.
 If skip → continue without comment.
 
-### 3g. Update docs/architecture/OVERVIEW.md
+### 3g. Deep architecture discovery — `docs/architecture/OVERVIEW.md`
 
-- Fill in with detected architecture (services, dependencies, data flow)
-- For simple projects (single service), simplify the template accordingly
-- For **Mode C/D/F**: document service boundaries and inter-service communication
+This is the most important step of onboarding. Your goal is to **genuinely understand** the project — not scan for keywords, but figure out how the system actually works. Write the OVERVIEW.md as if explaining the system to a senior engineer on their first day.
+
+#### How to approach this
+
+You already know what technologies look like. Don't follow a checklist — follow your curiosity. Read the code, trace connections, and build a mental model. Then write down what you learned.
+
+Start by answering these questions. Skip any that don't apply. Go deep on the ones that matter most for this specific project.
+
+**How does a request enter the system and what happens to it?**
+
+Trace a real request end to end. Find the entry point (API route, event handler, CLI command), follow it through middleware, business logic, and data access. Document the actual path with file names and function names. If there are multiple entry points (REST API, GraphQL, gRPC, message consumers), trace each one.
+
+**How does someone get authenticated and authorized?**
+
+Figure out the actual auth model. Is it JWT? Sessions? API keys? OAuth? What issues the tokens? What validates them? Where are roles and permissions defined? Is there an external identity provider or is it custom? Follow the middleware chain — what happens when a request arrives without valid credentials?
+
+**How does a change get from a developer's machine to production?**
+
+Map the entire delivery pipeline. What happens when someone pushes to main? Is there a staging environment? How are releases cut — tags, branches, manual? Is there GitOps (ArgoCD, FluxCD)? Helm charts? Raw manifests? Terraform? Understand the environment progression and what gates exist between them.
+
+**Where does data live and how does it move?**
+
+Identify every data store — not just "uses PostgreSQL" but which tables/collections matter, what ORM or query layer is used, how migrations work. Is there caching? Message queues? Event streaming? How does data flow between services? Are there any consistency boundaries or eventual consistency patterns?
+
+**What's the network topology?**
+
+Is there a VPN? API gateway? Load balancer? Service mesh? How do services find each other — DNS, service discovery, hardcoded URLs? Are there network policies or firewall rules? What's exposed to the internet vs internal-only?
+
+**How are secrets and configuration managed?**
+
+Where do environment variables come from? Is there a secrets manager (Vault, AWS Secrets Manager, sealed-secrets)? How does config differ between environments? Are there feature flags? How does a developer set up their local environment?
+
+**How do you know when something is broken?**
+
+What monitoring exists? Structured logging? Metrics? Distributed tracing? Alerting? Where do you look when something goes wrong at 3am? Dashboards? Log aggregation?
+
+**What would break if the wrong thing changed?**
+
+This is about understanding blast radius. Which services depend on which? What are the single points of failure? Are there any shared databases that multiple services write to? What changes require coordinated deployments?
+
+#### Writing the OVERVIEW.md
+
+For each question you could answer, write a section in `docs/architecture/OVERVIEW.md`. Be specific:
+
+- **Good:** "Auth uses JWT issued by `src/services/auth.ts:generateToken()`. Tokens are validated by Express middleware in `src/middleware/auth.ts`. Refresh tokens are stored in Redis (`auth:refresh:{userId}`) with 7-day TTL. Roles are defined in `src/config/roles.ts` — currently `admin`, `editor`, `viewer`."
+- **Bad:** "The project uses JWT-based authentication with Redis for session storage."
+
+The difference is that the good version lets the next Claude session make changes confidently. The bad version tells you nothing you couldn't guess.
+
+**For simple projects (Mode A):** You might only need 3-4 sections. Don't force complexity.
+**For multi-service (Mode C/D/F):** Document each service's role, how they communicate, and which ones can be changed independently vs require coordinated changes.
+
+See `examples/architecture-overview-example.md` for the expected depth and format.
 
 ### 3h. Update .claudeignore
 
