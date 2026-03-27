@@ -33,6 +33,7 @@ When adding or modifying this template:
 - Hooks are deterministic (always run); CLAUDE.md instructions are advisory (Claude may skip)
 - Scripts in `skills/*/scripts/` should be deterministic status checks or formatters — not reconstruction of logic Claude should reason through
 - `docs/archive/` is listed in `.claudeignore` — 0 token cost; anything superseded goes there
+- Memory is proactive: save project learnings and user corrections every session — enforced by Stop hook and `.claude/rules/proactive-memory.md`
 
 ## Token efficiency
 

@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Post-compaction reminder: check CLAUDE.md for project conventions. Preserve the list of modified files and test commands from before compaction.'"
+            "command": "echo 'Post-compaction reminder: check CLAUDE.md for project conventions. Preserve the list of modified files and test commands from before compaction. Check memory files for project context.'"
           }
         ]
       }
@@ -67,6 +67,15 @@
       }
     ],
     "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/scripts/stop-memory-reminder.sh"
+          }
+        ]
+      },
       {
         "matcher": "",
         "hooks": [
